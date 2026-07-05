@@ -12,11 +12,62 @@
 
     <button class="nav-btn hidden" id="btn-back">🔙 Hub</button>
     <button class="nav-btn hidden" id="btn-bag">🎒 Bag</button>
+    <div class="volume-control">
+        <label for="bgm-volume-slider">🎵 Music</label>
+        <input type="range" id="bgm-volume-slider" min="0" max="1" step="0.05" value="0.2">
+    </div>
+    <button class="dev-toggle-btn" id="dev-toggle-btn" type="button" aria-label="Developer mode"></button>
+
+    <div id="dev-panel" class="dev-panel hidden">
+        <h3>🛠️ Dev Tools</h3>
+        <label class="dev-field">
+            <span>Override next spin</span>
+            <input type="checkbox" id="dev-enable-override">
+        </label>
+        <label class="dev-field">
+            <span>Generation</span>
+            <select id="dev-gen-select">
+                <option value="">Random</option>
+                <option value="1">Gen 1</option>
+                <option value="2">Gen 2</option>
+                <option value="3">Gen 3</option>
+                <option value="4">Gen 4</option>
+                <option value="5">Gen 5</option>
+                <option value="6">Gen 6</option>
+                <option value="7">Gen 7</option>
+                <option value="8">Gen 8</option>
+                <option value="9">Gen 9</option>
+            </select>
+        </label>
+        <label class="dev-field">
+            <span>Rarity</span>
+            <select id="dev-rarity-select">
+                <option value="">Random</option>
+                <option value="common">Common</option>
+                <option value="rare">Rare</option>
+                <option value="epic">Epic</option>
+                <option value="legendary">Legendary</option>
+            </select>
+        </label>
+        <label class="dev-field">
+            <span>Force shiny</span>
+            <input type="checkbox" id="dev-shiny-checkbox">
+        </label>
+        <label class="dev-field">
+            <span>Exact Pokémon ID</span>
+            <input type="number" id="dev-pokemon-id" min="1" max="1025" placeholder="e.g. 150">
+        </label>
+        <div class="dev-actions">
+            <button type="button" id="dev-apply-btn">Apply</button>
+            <button type="button" id="dev-clear-btn">Clear</button>
+        </div>
+        <div id="dev-status" class="dev-status">No overrides active.</div>
+    </div>
 
     <div id="loading-screen" class="screen">
         <div class="loading-content">
             <div class="spinner">🌸</div>
-            <h1>Happy 1 Year!</h1>
+            <h1>Happy 2 Year Anniversary!</h1>
             <p>Loading your surprises... ✨</p>
         </div>
     </div>
@@ -33,6 +84,18 @@
                     <p>Spin the wheels to catch 'em all!</p>
                 </div>
                 
+                <div class="game-card" id="btn-fruit-slots">
+                    <div class="game-icon">🍇</div>
+                    <h3>Fruit Slots</h3>
+                    <p>Spin for fruity capsules!</p>
+                </div>
+
+                <div class="game-card" id="btn-fruit-dex">
+                    <div class="game-icon">🍓</div>
+                    <h3>Fruit Dex</h3>
+                    <p>See your fruit collection!</p>
+                </div>
+
                 <div class="game-card" id="btn-pokedex">
                     <div class="game-icon">📖</div>
                     <h3>Pokédex</h3>
@@ -86,10 +149,61 @@
         </div>
     </div>
 
+    <div id="fruit-slots-screen" class="screen hidden">
+        <div class="machine fruit-machine">
+            <h2>🍇 Fruit Slots 🍇</h2>
+            <p class="inv-subtitle">Odds: 50% for 2 matches, 25% for 3 matches, and 25% for no match.</p>
+
+            <div class="fruit-reels">
+                <div class="fruit-reel"><div class="fruit-symbol" id="fruit-reel-0">🍎</div></div>
+                <div class="fruit-reel"><div class="fruit-symbol" id="fruit-reel-1">🍌</div></div>
+                <div class="fruit-reel"><div class="fruit-symbol" id="fruit-reel-2">🍇</div></div>
+            </div>
+
+            <button id="fruit-spin-btn">SPIN!</button>
+            <button id="fruit-dex-btn" class="fruit-dex-btn">Fruit Dex</button>
+            <div id="fruit-message" class="fruit-message">Spin for a fruity prize! ✨</div>
+
+            <div id="fruit-reward-area" class="fruit-reward-area hidden">
+                <div class="fruit-capsule" id="fruit-capsule">
+                    <div class="fruit-capsule-top" id="fruit-cap-top"></div>
+                    <div class="fruit-capsule-bottom"></div>
+                    <div class="fruit-capsule-button"></div>
+                    <div class="fruit-capsule-symbol" id="fruit-capsule-symbol">🍓</div>
+                </div>
+                <div class="reward-info">
+                    <div class="badge" id="fruit-tier-badge">Common</div>
+                    <div class="badge" id="fruit-name-badge">Apple</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="fruit-pokedex-screen" class="screen hidden">
+        <div class="machine fruit-pokedex-machine">
+            <h2>🍓 Fruit Dex 🍓</h2>
+            <p class="inv-subtitle">These are the fruits you’ve collected and the ones still waiting to be found.</p>
+            <div class="fruit-pokedex-layout">
+                <div id="fruit-pokedex-grid" class="fruit-pokedex-grid"></div>
+                <div class="fruit-details-panel">
+                    <h3>Fruit Details</h3>
+                    <div id="fruit-details-content" class="fruit-details-content">
+                        Select a fruit to see its rarity progress.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="screen-inventory" class="screen hidden">
         <div class="machine inventory-machine">
-            <h2>🎒 Your Collection 🎒</h2>
-            <p class="inv-subtitle">Trade 5 of the same rarity for 1 of the next!</p>
+            <h2>🎒 Your Bags 🎒</h2>
+            <p class="inv-subtitle" id="inventory-subtitle">Choose a bag to view your collection.</p>
+
+            <div class="bag-tabs">
+                <button class="bag-tab active" id="bag-tab-pokemon" type="button">Pokémon Bag</button>
+                <button class="bag-tab" id="bag-tab-fruit" type="button">Fruit Bag</button>
+            </div>
             
             <div class="inventory-scroll-area" id="inventory-content">
                 </div>
