@@ -275,7 +275,11 @@ function getInventoryItems(tierKey) {
 
 function addPokemonToInventory(tierKey, pokeId, shiny = false) {
     const existing = inventory[tierKey].find(item => item.id === pokeId && item.shiny === shiny);
-    if (!existing) inventory[tierKey].push({ id: pokeId, shiny });
+    if (existing) {
+        existing.count = (existing.count || 1) + 1;
+    } else {
+        inventory[tierKey].push({ id: pokeId, shiny, count: 1 });
+    }
 }
 
 function getPokemonSpriteUrl(id, shiny = false) {
@@ -1083,6 +1087,7 @@ function renderInventory(view = activeBagView) {
                     ${isFav ? '❤️' : '🤍'}
                 </button>
                 ${item.shiny ? '<span class="shiny-icon">✨</span>' : ''}
+                ${item.count > 1 ? `<span class="inv-count-badge">x${item.count}</span>` : ''}
                 <img src="${getPokemonSpriteUrl(item.id, item.shiny)}" alt="poke">
             `;
             grid.appendChild(box);

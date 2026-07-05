@@ -199,6 +199,7 @@ button:disabled { background-color: #ccc; box-shadow: 0 6px 0 #aaa; cursor: not-
 .fav-btn { position: absolute; top: -6px; right: -6px; background: #fff; border: 2px solid #ddd; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; padding: 0; transition: all 0.2s; }
 .fav-btn.active { border-color: #ff7b89; }
 .fav-btn:active { transform: scale(0.8); }
+.inv-count-badge { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); background: #ff7b89; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 999px; line-height: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.15); z-index: 5; }
 
 .dex-actions { display: flex; justify-content: center; gap: 10px; margin-top: 10px; margin-bottom: 15px; }
 .dex-action-btn { font-size: 14px; padding: 8px 15px; border-radius: 20px; background: #fff; border: 2px solid #ddd; cursor: pointer; transition: all 0.2s; color: #4a4a4a; width: auto; box-shadow: none; display: inline-block; }
