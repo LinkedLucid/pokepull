@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk-Free Casino ✨</title>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap');
+
+body {
+    background-color: #ffd1dc; 
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; margin: 0; font-family: 'Fredoka', sans-serif;
+    color: #4a4a4a; overflow: hidden;
+}
+
+/* Floating Background */
+#floating-background { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -5; overflow: hidden; }
+.floating-item { position: absolute; bottom: -100px; animation: floatUp linear infinite; opacity: 0.6; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+@keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-120vh) rotate(360deg); } }
+
+/* Screen Management */
+.screen { width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center; position: absolute; top: 0; left: 0; transition: opacity 0.4s ease-in-out, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(1); }
+.screen.hidden { opacity: 0; pointer-events: none; z-index: -1; transform: scale(0.9); }
+.hidden { display: none !important; }
+
+/* Loading & Menus */
+#loading-screen { z-index: 100; }
+.loading-content { text-align: center; background: rgba(255, 209, 220, 0.8); padding: 30px; border-radius: 20px; backdrop-filter: blur(5px); }
+.loading-content h1 { color: #ff7b89; font-size: 36px; margin-bottom: 5px; }
+.spinner { font-size: 60px; animation: spin-pulse 2s infinite linear; }
+@keyframes spin-pulse { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.2) rotate(180deg); } 100% { transform: scale(1) rotate(360deg); } }
+
+#main-menu { z-index: 50; }
+.menu-container { background-color: rgba(168, 230, 207, 0.95); padding: 40px; border-radius: 24px; box-shadow: 0 12px 24px rgba(0,0,0,0.1); text-align: center; border: 6px solid #ffffff; width: 90%; max-width: 500px; backdrop-filter: blur(4px); }
+.game-grid { display: flex; gap: 20px; margin-top: 30px; justify-content: center; flex-wrap: wrap; }
+.game-card { background: #ffffff; border: 4px solid #e8f9f2; border-radius: 16px; padding: 20px; width: 160px; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 6px 0 #d1f3e7; }
+.game-card:hover:not(.locked) { transform: translateY(-5px) scale(1.05); box-shadow: 0 11px 0 #d1f3e7; border-color: #ffb7b2; }
+.game-card:active:not(.locked) { transform: translateY(6px) scale(0.95); box-shadow: 0 0 0 #d1f3e7; }
+.game-icon { font-size: 40px; margin-bottom: 10px; }
+.game-card h3 { margin: 0 0 5px 0; color: #ff7b89; }
+.game-card p { font-size: 13px; margin: 0; color: #888; }
+.locked { background: #e0e0e0; border-color: #cccccc; box-shadow: 0 6px 0 #bbbbbb; cursor: not-allowed; filter: grayscale(100%); }
+
+/* Machine Container */
+.machine { background-color: rgba(168, 230, 207, 0.95); padding: 40px; border-radius: 24px; box-shadow: 0 12px 24px rgba(0,0,0,0.1); text-align: center; border: 6px solid #ffffff; width: 350px; max-height: 85vh; overflow-y: auto; backdrop-filter: blur(4px); }
+.machine::-webkit-scrollbar { width: 0px; }
+
+/* Wheel specific machine styling - allows expanding to fit large multi-wheels! */
+.wheel-machine { width: 90%; max-width: 750px; }
+
+/* Global Nav Buttons */
+.nav-btn { position: fixed; top: 20px; width: max-content; background-color: #ffffff; color: #ff7b89; padding: 12px 25px; font-size: 16px; border-radius: 50px; border: 4px solid #a8e6cf; box-shadow: 0 6px 0 #d1f3e7; z-index: 100; cursor: pointer; font-family: 'Fredoka', sans-serif; font-weight: 600; transition: all 0.1s; }
+.nav-btn:active:not(:disabled) { box-shadow: 0 0 0 #d1f3e7; transform: translateY(6px); }
+#btn-back { left: 20px; }
+#btn-bag { right: 20px; }
+h2 { margin-top: 10px; color: #3d3d3d; font-size: 28px; letter-spacing: 1px; }
+
+/* Standard Wheel */
+.wheel-box { position: relative; width: 280px; height: 280px; margin: 0 auto 25px auto; }
+.pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 35px; color: #ffb7b2; z-index: 10; text-shadow: 0 3px 0 #ffffff, 0 5px 10px rgba(0,0,0,0.2); }
+#wheel-canvas { width: 100%; height: 100%; border-radius: 50%; border: 6px solid #ffffff; box-sizing: border-box; box-shadow: inset 0 4px 8px rgba(0,0,0,0.05), 0 8px 16px rgba(0,0,0,0.1); transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1); background: #e8f9f2; }
+
+/* Multi-Spin Features (Scaled up!) */
+#multi-spin-controls { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+.multi-btn { font-size: 12px; padding: 10px; border-radius: 12px; }
+.rare-btn { background-color: #74b9ff; box-shadow: 0 4px 0 #0984e3; }
+.rare-btn:active { box-shadow: 0 0 0 #0984e3; }
+.epic-btn { background-color: #a29bfe; box-shadow: 0 4px 0 #6c5ce7; }
+.epic-btn:active { box-shadow: 0 0 0 #6c5ce7; }
+#multi-wheel-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-bottom: 25px; }
+.mini-wheel-box { position: relative; width: 140px; height: 140px; } /* Doubled Size! */
+.mini-wheel-box canvas { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #ffffff; box-sizing: border-box; background: #e8f9f2; box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+.mini-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 24px; color: #ffb7b2; z-index: 10; text-shadow: 0 2px 0 #ffffff; }
+
+#multi-reward-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 20px; animation: popIn 0.5s; }
+.mini-reward-card { display: flex; flex-direction: column; align-items: center; gap: 8px; background: #fff; padding: 12px; border-radius: 16px; border: 3px solid #e8f9f2; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 120px;}
+.mini-capsule { width: 80px; height: 80px; border-radius: 50%; position: relative; overflow: hidden; border: 4px solid #3d3d3d; background: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+.mini-cap-top { position: absolute; top: 0; width: 100%; height: 50%; border-bottom: 4px solid #3d3d3d; z-index: 1; }
+.mini-cap-bottom { position: absolute; bottom: 0; width: 100%; height: 50%; background: #fff; z-index: 1; }
+.mini-capsule img { position: relative; z-index: 4; width: 65px; height: 65px; image-rendering: pixelated; animation: float 2s infinite; margin-top: 5px;}
+.mini-reward-types { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
+.mini-reward-types .badge { font-size: 10px; padding: 3px 6px; margin: 0;}
+
+button { background-color: #ffb7b2; border: none; padding: 15px 40px; font-size: 22px; border-radius: 50px; color: white; width: 100%; cursor: pointer; font-family: 'Fredoka', sans-serif; font-weight: 600; transition: all 0.1s; box-shadow: 0 6px 0 #e69c98; }
+button:active:not(:disabled) { transform: translateY(6px); box-shadow: 0 0 0 #e69c98; }
+button:disabled { background-color: #ccc; box-shadow: 0 6px 0 #aaa; cursor: not-allowed; transform: none; }
+#message { margin-top: 20px; font-size: 20px; font-weight: 600; min-height: 30px; color: #ff7b89; }
+
+/* Single Capsule Styles */
+#reward-area { margin-top: 20px; padding: 20px; background: #ffffff; border-radius: 16px; border: 4px solid #e8f9f2; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+.capsule { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto; position: relative; box-shadow: 0 6px 12px rgba(0,0,0,0.15); overflow: hidden; display: flex; justify-content: center; align-items: center; border: 5px solid #3d3d3d; background: #fff; }
+.capsule-top { position: absolute; top: 0; width: 100%; height: 50%; border-bottom: 5px solid #3d3d3d; z-index: 1; transition: background-color 0.3s; }
+.capsule-bottom { position: absolute; bottom: 0; width: 100%; height: 50%; background: #ffffff; z-index: 1; }
+.capsule-button { position: absolute; width: 24px; height: 24px; background: #ffffff; border: 5px solid #3d3d3d; border-radius: 50%; z-index: 3; }
+.capsule img { z-index: 4; width: 90px; height: 90px; image-rendering: pixelated; animation: float 2s ease-in-out infinite; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.reward-info { margin-top: 15px; font-weight: 600; }
+.badge { display: inline-block; padding: 5px 10px; border-radius: 12px; font-size: 13px; color: #ffffff; margin: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* INVENTORY STYLES */
+.inventory-machine { width: 90%; max-width: 600px; padding: 30px; }
+.inv-subtitle { color: #555; margin-top: 0; margin-bottom: 20px; font-size: 14px; }
+.inventory-scroll-area { display: flex; flex-direction: column; gap: 20px; }
+.inv-tier-section { background: rgba(255,255,255,0.7); border-radius: 16px; padding: 15px; border: 3px solid #fff; }
+.inv-tier-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px dashed #a8e6cf; padding-bottom: 10px; }
+.inv-tier-header h3 { margin: 0; color: #4a4a4a; display: flex; align-items: center; gap: 10px; }
+.craft-btn { width: auto; font-size: 14px; padding: 8px 15px; box-shadow: 0 4px 0 #e69c98; }
+.craft-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #e69c98; }
+.inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; }
+.inv-item { background: #fff; border-radius: 12px; border: 2px solid #ddd; display: flex; justify-content: center; align-items: center; height: 60px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+.inv-item img { width: 50px; height: 50px; image-rendering: pixelated; }
+
+/* Favorite Buttons */
+.fav-btn { position: absolute; top: -6px; right: -6px; background: #fff; border: 2px solid #ddd; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; padding: 0; transition: all 0.2s; }
+.fav-btn.active { border-color: #ff7b89; }
+.fav-btn:active { transform: scale(0.8); }
+
+.dex-actions { display: flex; justify-content: center; gap: 10px; margin-top: 10px; margin-bottom: 15px; }
+.dex-action-btn { font-size: 14px; padding: 8px 15px; border-radius: 20px; background: #fff; border: 2px solid #ddd; cursor: pointer; transition: all 0.2s; color: #4a4a4a; width: auto; box-shadow: none; display: inline-block; }
+.dex-action-btn.active { border-color: #ff7b89; background: #ffeef0; color: #ff7b89; font-weight: bold; }
+.dex-action-btn:active { transform: scale(0.95); }
+
+/* Form Buttons */
+.dex-forms { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px; }
+.form-btn { font-size: 11px; padding: 6px 10px; border-radius: 12px; background: #eee; color: #4a4a4a; border: 2px solid #ddd; cursor: pointer; width: auto; box-shadow: none;}
+.form-btn.active { background: #e8f9f2; border-color: #a8e6cf; font-weight: bold; }
+.form-btn:active { transform: scale(0.95); }
+
+/* POKEDEX STYLES */
+.pokedex-machine { width: 90%; max-width: 700px; padding: 30px; }
+.dex-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(255,255,255,0.6); padding: 15px; border-radius: 16px; border: 3px solid #fff; }
+#dex-gen-select { font-family: 'Fredoka', sans-serif; font-size: 16px; padding: 8px 15px; border-radius: 12px; border: 2px solid #a8e6cf; color: #4a4a4a; outline: none; cursor: pointer; }
+.dex-progress { font-weight: 600; color: #ff7b89; }
+.pokedex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; max-height: 50vh; overflow-y: auto; padding-right: 10px; }
+.pokedex-grid::-webkit-scrollbar { width: 8px; }
+.pokedex-grid::-webkit-scrollbar-track { background: rgba(255,255,255,0.5); border-radius: 10px; }
+.pokedex-grid::-webkit-scrollbar-thumb { background: #ffb7b2; border-radius: 10px; }
+.dex-item { background: #fff; border-radius: 12px; border: 3px solid #e8f9f2; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 75px; cursor: pointer; transition: transform 0.1s; box-shadow: 0 4px 0 #d1f3e7; position: relative; }
+.dex-item:active { transform: translateY(4px); box-shadow: 0 0 0 #d1f3e7; }
+.dex-item img { width: 60px; height: 60px; image-rendering: pixelated; }
+.dex-item.unowned { filter: grayscale(100%) opacity(0.5); background: #eee; border-color: #ccc; box-shadow: 0 4px 0 #bbb; }
+.dex-item.unowned:active { box-shadow: 0 0 0 #bbb; }
+.dex-id-label { position: absolute; top: 2px; left: 4px; font-size: 10px; color: #888; font-weight: 600; }
+.dex-fav-heart { position: absolute; top: 2px; right: 4px; font-size: 10px; }
+.dex-types { display: flex; justify-content: center; gap: 5px; }
+
+/* Modals */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 200; transition: opacity 0.3s ease; }
+.modal-content { background: #ffffff; padding: 30px; border-radius: 24px; text-align: center; border: 6px solid #a8e6cf; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 300px; position: relative; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(1); }
+.modal.hidden .modal-content { transform: scale(0.7); }
+.modal-content h3 { color: #ff7b89; margin-top: 0; margin-bottom: 10px; font-size: 24px;}
+.close-btn { position: absolute; top: -15px; right: -15px; width: 40px; height: 40px; padding: 0; background: #ffb7b2; border-radius: 50%; font-size: 18px; line-height: 40px; }
+
+/* SELECTION MODAL STYLES */
+.select-modal-content { width: 400px; }
+.selection-grid { max-height: 250px; overflow-y: auto; padding-right: 5px; margin-top: 15px; }
+.selectable-item { cursor: pointer; transition: all 0.2s; }
+.selectable-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.selectable-item.selected { background-color: #e8f9f2; border: 3px solid #ff7b89 !important; transform: scale(1.05); }
+.locked-item { filter: grayscale(70%); opacity: 0.6; cursor: not-allowed; }
+.fav-lock { position: absolute; top: 2px; left: 4px; font-size: 14px; }
+
+/* Crafting Animation Modal */
+#craft-anim-modal { z-index: 250; }
+.craft-anim-wrapper { position: relative; width: 150px; height: 150px; animation: vortex-spin 2s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards; }
+@keyframes vortex-spin { 0% { transform: rotate(0deg) scale(1.5); opacity: 1; } 80% { transform: rotate(720deg) scale(0.2); opacity: 1; } 100% { transform: rotate(1080deg) scale(0); opacity: 0; } }
+.craft-particle { position: absolute; width: 60px; height: 60px; image-rendering: pixelated; top: 50%; left: 50%; margin-top: -30px; margin-left: -30px; }
+.craft-particle:nth-child(1) { transform: translateY(-80px); }
+.craft-particle:nth-child(2) { transform: rotate(72deg) translateY(-80px); }
+.craft-particle:nth-child(3) { transform: rotate(144deg) translateY(-80px); }
+.craft-particle:nth-child(4) { transform: rotate(216deg) translateY(-80px); }
+.craft-particle:nth-child(5) { transform: rotate(288deg) translateY(-80px); }
+
+/* Dex Detail Modal Specifics */
+.dex-modal-content { width: 320px; }
+.dex-loading { font-size: 18px; color: #ff7b89; padding: 40px 0; font-weight: 600; }
+.dex-image-container { background: #e8f9f2; border-radius: 50%; width: 120px; height: 120px; margin: 5px auto; display: flex; justify-content: center; align-items: center; border: 4px solid #a8e6cf; }
+.dex-image-container img { width: 100px; height: 100px; image-rendering: pixelated; }
+.dex-desc { font-size: 14px; color: #555; background: #f8f8f8; padding: 12px; border-radius: 12px; border: 2px dashed #ccc; font-style: italic; margin: 15px 0; }
+.dex-stats { display: flex; flex-direction: column; gap: 8px; }
+.stat-row { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #666; }
+.stat-label { width: 45px; text-align: right; }
+.stat-val { width: 30px; text-align: left; color: #ff7b89; }
+.stat-bar { flex-grow: 1; background: #eee; height: 12px; border-radius: 6px; overflow: hidden; }
+.stat-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease-out; }
+.hp { background-color: #ff7675; }
+.atk { background-color: #fdcb6e; }
+.def { background-color: #74b9ff; }
+.spa { background-color: #a29bfe; }
+.spd { background-color: #81ecec; }
+.spe { background-color: #fab1a0; }
+#dex-ownership-badge { margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+    <div id="floating-background"></div>
+
+    <button class="nav-btn hidden" id="btn-back">🔙 Hub</button>
+    <button class="nav-btn hidden" id="btn-bag">🎒 Bag</button>
+
+    <div id="loading-screen" class="screen">
+        <div class="loading-content">
+            <div class="spinner">🌸</div>
+            <h1>Happy 1 Year!</h1>
+            <p>Loading your surprises... ✨</p>
+        </div>
+    </div>
+
+    <div id="main-menu" class="screen hidden">
+        <div class="menu-container">
+            <h2>🎀 Minigame Hub 🎀</h2>
+            <p>Pick your risk-free poison!</p>
+            
+            <div class="game-grid">
+                <div class="game-card" id="btn-wheel">
+                    <div class="game-icon">🎡</div>
+                    <h3>Poké Wheel</h3>
+                    <p>Spin the wheels to catch 'em all!</p>
+                </div>
+                
+                <div class="game-card" id="btn-pokedex">
+                    <div class="game-icon">📖</div>
+                    <h3>Pokédex</h3>
+                    <p>Track your collection!</p>
+                </div>
+
+                <div class="game-card locked">
+                    <div class="game-icon">🔒</div>
+                    <h3>Coming Soon</h3>
+                    <p>More fun on the way...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-wheel" class="screen hidden">
+        <div class="machine wheel-machine">
+            <h2 id="wheel-title">🎀 Gen Wheel 🎀</h2>
+            
+            <div id="multi-spin-controls">
+                <button onclick="attemptMultiSpin(5, 'rare')" class="multi-btn rare-btn">x5 Spin (Cost: 1 Rare)</button>
+                <button onclick="attemptMultiSpin(10, 'epic')" class="multi-btn epic-btn">x10 Spin (Cost: 1 Epic)</button>
+            </div>
+
+            <div class="wheel-box">
+                <div class="pointer">▼</div>
+                <canvas id="wheel-canvas" width="280" height="280"></canvas>
+            </div>
+
+            <div id="multi-wheel-grid" class="hidden"></div>
+
+            <button id="spinBtn">SPIN!</button>
+            <div id="message">Spin to pick a Generation!</div>
+
+            <div id="reward-area">
+                <div class="capsule">
+                    <div class="capsule-top" id="cap-top"></div>
+                    <div class="capsule-bottom"></div>
+                    <div class="capsule-button"></div>
+                    <img id="pokemon-img" src="" alt="pokemon">
+                </div>
+                <div class="reward-info">
+                    <div class="badge" id="gen-badge">Gen 1</div>
+                    <div class="badge" id="rarity-badge">Legendary</div>
+                </div>
+                <div id="reward-types" class="dex-types" style="margin-top: 10px;">
+                    </div>
+            </div>
+
+            <div id="multi-reward-area" class="hidden"></div>
+        </div>
+    </div>
+
+    <div id="screen-inventory" class="screen hidden">
+        <div class="machine inventory-machine">
+            <h2>🎒 Your Collection 🎒</h2>
+            <p class="inv-subtitle">Trade 5 of the same rarity for 1 of the next!</p>
+            
+            <div class="inventory-scroll-area" id="inventory-content">
+                </div>
+        </div>
+
+        <div id="craft-anim-modal" class="modal hidden">
+            <div class="craft-anim-wrapper" id="craft-vortex">
+                </div>
+        </div>
+
+        <div id="craft-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>✨ Trade Successful! ✨</h3>
+                <p>You crafted a <span id="craft-tier-name">Rare</span> Pokémon!</p>
+                <div class="capsule">
+                    <div class="capsule-top" id="craft-cap-top"></div>
+                    <div class="capsule-bottom"></div>
+                    <div class="capsule-button"></div>
+                    <img id="craft-pokemon-img" src="" alt="pokemon">
+                </div>
+                <button onclick="closeCraftModal()" style="margin-top: 15px;">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-pokedex" class="screen hidden">
+        <div class="machine pokedex-machine">
+            <h2>📖 Pokédex 📖</h2>
+            
+            <div class="dex-controls">
+                <select id="dex-gen-select" onchange="renderPokedexGrid()">
+                    <option value="1">Generation 1</option>
+                    <option value="2">Generation 2</option>
+                    <option value="3">Generation 3</option>
+                    <option value="4">Generation 4</option>
+                    <option value="5">Generation 5</option>
+                    <option value="6">Generation 6</option>
+                    <option value="7">Generation 7</option>
+                    <option value="8">Generation 8</option>
+                    <option value="9">Generation 9</option>
+                </select>
+                <div id="dex-progress" class="dex-progress">0 / 151 Owned</div>
+            </div>
+
+            <div class="pokedex-grid" id="pokedex-grid">
+                </div>
+        </div>
+
+        <div id="dex-modal" class="modal hidden">
+            <div class="modal-content dex-modal-content">
+                <button class="close-btn" onclick="closeDexModal()">✖</button>
+                
+                <div id="dex-loading" class="dex-loading">Fetching Data... 🌸</div>
+                
+                <div id="dex-content" class="hidden">
+                    <h3 id="dex-name">Bulbasaur</h3>
+                    <div class="badge" id="dex-ownership-badge">Owned 💖</div>
+                    
+                    <div class="dex-image-container">
+                        <img id="dex-detail-img" src="" alt="pokemon">
+                    </div>
+
+                    <div class="dex-actions" id="dex-actions">
+                        <button id="dex-fav-btn" class="dex-action-btn">🤍 Favorite</button>
+                        <button id="dex-shiny-btn" class="dex-action-btn" onclick="toggleShiny()">✨ Shiny</button>
+                    </div>
+
+                    <div id="dex-forms" class="dex-forms">
+                        </div>
+                    
+                    <div class="dex-types" id="dex-types">
+                        </div>
+                    
+                    <p class="dex-desc" id="dex-desc">A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.</p>
+                    
+                    <div class="dex-stats">
+                        <div class="stat-row"><span class="stat-label">HP</span><div class="stat-bar"><div class="stat-fill hp" id="stat-hp"></div></div><span class="stat-val" id="val-hp">0</span></div>
+                        <div class="stat-row"><span class="stat-label">ATK</span><div class="stat-bar"><div class="stat-fill atk" id="stat-atk"></div></div><span class="stat-val" id="val-atk">0</span></div>
+                        <div class="stat-row"><span class="stat-label">DEF</span><div class="stat-bar"><div class="stat-fill def" id="stat-def"></div></div><span class="stat-val" id="val-def">0</span></div>
+                        <div class="stat-row"><span class="stat-label">SP.ATK</span><div class="stat-bar"><div class="stat-fill spa" id="stat-spa"></div></div><span class="stat-val" id="val-spa">0</span></div>
+                        <div class="stat-row"><span class="stat-label">SP.DEF</span><div class="stat-bar"><div class="stat-fill spd" id="stat-spd"></div></div><span class="stat-val" id="val-spd">0</span></div>
+                        <div class="stat-row"><span class="stat-label">SPEED</span><div class="stat-bar"><div class="stat-fill spe" id="stat-spe"></div></div><span class="stat-val" id="val-spe">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="select-modal" class="modal hidden">
+        <div class="modal-content select-modal-content">
+            <button class="close-btn" onclick="closeSelectModal()">✖</button>
+            <h3 id="select-modal-title">Select Pokémon</h3>
+            <p id="select-modal-subtitle">Pick 5 Pokémon</p>
+            
+            <div id="select-grid" class="inv-grid selection-grid">
+                </div>
+            
+            <button id="select-confirm-btn" disabled style="margin-top: 20px;">Confirm Selection</button>
+        </div>
+    </div>
+
+    <script>
+// --- Audio System ---
+const sfx = {
+    bgm: new Audio('sounds/bgm.mp3'),
+    click: new Audio('sounds/click.mp3'),
+    spin: new Audio('sounds/spin.mp3'),
+    win: new Audio('sounds/win.mp3'),
+    craft: new Audio('sounds/craft.mp3'),
+    open: new Audio('sounds/open.mp3')
+};
+
+Object.values(sfx).forEach(audio => audio.volume = 0.5);
+sfx.bgm.volume = 0.2;
+sfx.bgm.loop = true;
+
+let bgmStarted = false;
+document.body.addEventListener('click', () => {
+    if (!bgmStarted) {
+        sfx.bgm.play().catch(() => {});
+        bgmStarted = true;
+    }
+});
+
+function playSound(type) {
+    if (sfx[type]) {
+        sfx[type].currentTime = 0;
+        sfx[type].play().catch(() => {}); 
+    }
+}
+
+// --- Constants & Data ---
+const MAX_POKEMON = 1025;
+const genBounds = {
+    1: [1, 151], 2: [152, 251], 3: [252, 386],
+    4: [387, 493], 5: [494, 649], 6: [650, 721],
+    7: [722, 809], 8: [810, 905], 9: [906, 1025]
+};
+const legendaries = [
+    144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251,
+    377, 378, 379, 380, 381, 382, 383, 384, 385, 386,
+    480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493,
+    494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649,
+    716, 717, 718, 719, 720, 721,
+    772, 773, 785, 786, 787, 788, 789, 790, 791, 792, 793, 794, 795, 796, 797, 798, 799, 800, 801, 802, 803, 804, 805, 806, 807, 808, 809,
+    888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, 905,
+    1001, 1002, 1003, 1004, 1007, 1008, 1009, 1010, 1014, 1015, 1016, 1017, 1024, 1025
+];
+
+const rarities = [
+    { id: 'common', name: 'Common', color: '#b2bec3', chance: 0.85, pool: 'normal', next: 'rare' },
+    { id: 'rare', name: 'Rare', color: '#74b9ff', chance: 0.10, pool: 'normal', next: 'epic' },
+    { id: 'epic', name: 'Epic', color: '#a29bfe', chance: 0.04, pool: 'normal', next: 'legendary' },
+    { id: 'legendary', name: 'Legendary', color: '#ff7675', chance: 0.01, pool: 'legendary', next: null }
+];
+
+const rarityTiers = {};
+rarities.forEach(r => rarityTiers[r.id] = r);
+
+// --- Storage Systems ---
+let inventory = JSON.parse(localStorage.getItem('pokeInventory')) || { common: [], rare: [], epic: [], legendary: [] };
+let favorites = JSON.parse(localStorage.getItem('pokeFavs')) || [];
+let ownedSpecies = JSON.parse(localStorage.getItem('pokeSpecies')) || []; 
+
+function saveInventory() { 
+    localStorage.setItem('pokeInventory', JSON.stringify(inventory)); 
+    localStorage.setItem('pokeSpecies', JSON.stringify(ownedSpecies));
+}
+
+function isPokemonOwned(id) { 
+    return Object.values(inventory).some(tierArray => tierArray.includes(id)); 
+}
+
+function toggleFavorite(id) {
+    playSound('click');
+    if (favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+    else favorites.push(id);
+    localStorage.setItem('pokeFavs', JSON.stringify(favorites));
+    
+    if (!document.getElementById('screen-inventory').classList.contains('hidden')) renderInventory();
+    if (!document.getElementById('screen-pokedex').classList.contains('hidden')) renderPokedexGrid();
+}
+
+// --- Floating Background System ---
+const bgSymbols = ['🍰', '🎂', '🍫', '🍓', '🍬'];
+const bgContainer = document.getElementById('floating-background');
+
+function spawnFloatingSweet() {
+    const item = document.createElement('div');
+    item.classList.add('floating-item');
+    item.textContent = bgSymbols[Math.floor(Math.random() * bgSymbols.length)];
+    const size = Math.random() * 25 + 20; 
+    const leftPosition = Math.random() * 100; 
+    const floatDuration = Math.random() * 10 + 12; 
+    const startDelay = Math.random() * 5; 
+    
+    item.style.fontSize = `${size}px`;
+    item.style.left = `${leftPosition}vw`;
+    item.style.animationDuration = `${floatDuration}s`;
+    item.style.animationDelay = `${startDelay}s`;
+    
+    bgContainer.appendChild(item);
+    setTimeout(() => { item.remove(); }, (floatDuration + startDelay) * 1000);
+}
+
+for(let i = 0; i < 12; i++) spawnFloatingSweet();
+setInterval(spawnFloatingSweet, 2000);
+
+// --- Screen Navigation Logic ---
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+        document.getElementById('main-menu').classList.remove('hidden');
+        document.getElementById('btn-bag').classList.remove('hidden');
+        playSound('open');
+    }, 2500);
+});
+
+function switchScreen(hideId, showId) {
+    playSound('open');
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(showId).classList.remove('hidden');
+    
+    const btnBack = document.getElementById('btn-back');
+    const btnBag = document.getElementById('btn-bag');
+    
+    if(showId === 'main-menu') {
+        btnBack.classList.add('hidden');
+        btnBag.classList.remove('hidden');
+    } else if (showId === 'game-wheel') {
+        btnBack.classList.remove('hidden');
+        btnBag.classList.remove('hidden');
+        btnBack.onclick = () => { playSound('click'); switchScreen('game-wheel', 'main-menu'); };
+    } else if (showId === 'screen-inventory') {
+        btnBag.classList.add('hidden');
+        btnBack.classList.remove('hidden');
+        btnBack.onclick = () => { playSound('click'); switchScreen('screen-inventory', 'main-menu'); };
+        renderInventory();
+    } else if (showId === 'screen-pokedex') {
+        btnBag.classList.remove('hidden');
+        btnBack.classList.remove('hidden');
+        btnBack.onclick = () => { playSound('click'); switchScreen('screen-pokedex', 'main-menu'); };
+        renderPokedexGrid();
+    }
+}
+
+document.getElementById('btn-wheel').addEventListener('click', () => { switchScreen('main-menu', 'game-wheel'); resetGame(); });
+document.getElementById('btn-bag').addEventListener('click', () => { switchScreen(null, 'screen-inventory'); });
+document.getElementById('btn-pokedex').addEventListener('click', () => { switchScreen('main-menu', 'screen-pokedex'); });
+
+// --- Selection Modal System (For Crafting & Sacrificing) ---
+let pendingSelection = { type: '', tier: '', required: 0, callback: null, selectedIndices: [] };
+
+function openSelectionModal(type, tier, requiredCount, callback) {
+    playSound('open');
+    const availableItems = inventory[tier].map((id, index) => ({ id, index })).filter(item => !favorites.includes(item.id));
+    
+    if (availableItems.length < requiredCount) {
+        alert(`You need ${requiredCount} unfavorited ${rarityTiers[tier].name} Pokémon to do this! Unfavorite some first. ❌`);
+        return;
+    }
+
+    pendingSelection = { type, tier, required: requiredCount, callback, selectedIndices: [] };
+    
+    document.getElementById('select-modal-title').textContent = type === 'craft' ? 'Crafting Menu' : 'Sacrifice Menu';
+    document.getElementById('select-modal-subtitle').textContent = `Pick ${requiredCount} ${rarityTiers[tier].name} Pokémon`;
+    
+    const grid = document.getElementById('select-grid');
+    grid.innerHTML = '';
+    
+    inventory[tier].forEach((id, index) => {
+        const isFav = favorites.includes(id);
+        const box = document.createElement('div');
+        box.classList.add('inv-item');
+        box.style.borderColor = rarityTiers[tier].color;
+        
+        if (isFav) {
+            box.classList.add('locked-item');
+            box.innerHTML = `<span class="fav-lock">❤️</span><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png">`;
+        } else {
+            box.classList.add('selectable-item');
+            box.onclick = () => toggleSelection(index, box);
+            box.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png">`;
+        }
+        grid.appendChild(box);
+    });
+    
+    updateSelectionConfirmBtn();
+    
+    const confirmBtn = document.getElementById('select-confirm-btn');
+    confirmBtn.onclick = () => confirmSelection();
+    
+    document.getElementById('select-modal').classList.remove('hidden');
+}
+
+function toggleSelection(index, boxEl) {
+    playSound('click');
+    const pos = pendingSelection.selectedIndices.indexOf(index);
+    if (pos > -1) {
+        pendingSelection.selectedIndices.splice(pos, 1);
+        boxEl.classList.remove('selected');
+    } else {
+        if (pendingSelection.selectedIndices.length < pendingSelection.required) {
+            pendingSelection.selectedIndices.push(index);
+            boxEl.classList.add('selected');
+        }
+    }
+    updateSelectionConfirmBtn();
+}
+
+function updateSelectionConfirmBtn() {
+    const btn = document.getElementById('select-confirm-btn');
+    if (pendingSelection.selectedIndices.length === pendingSelection.required) {
+        btn.disabled = false;
+        btn.textContent = "Confirm Selection";
+    } else {
+        btn.disabled = true;
+        btn.textContent = `Selected ${pendingSelection.selectedIndices.length} / ${pendingSelection.required}`;
+    }
+}
+
+function confirmSelection() {
+    playSound('click');
+    document.getElementById('select-modal').classList.add('hidden');
+    if (pendingSelection.callback) {
+        pendingSelection.callback([...pendingSelection.selectedIndices]);
+    }
+}
+
+function closeSelectModal() {
+    playSound('click');
+    document.getElementById('select-modal').classList.add('hidden');
+}
+
+
+// --- Wheel Data & Logic ---
+const genSegments = [
+    { label: 'Gen 1', color: '#ffb7b2', id: 1 }, { label: 'Gen 2', color: '#a8e6cf', id: 2 },
+    { label: 'Gen 3', color: '#ffffff', id: 3 }, { label: 'Gen 4', color: '#ffb7b2', id: 4 },
+    { label: 'Gen 5', color: '#a8e6cf', id: 5 }, { label: 'Gen 6', color: '#ffffff', id: 6 },
+    { label: 'Gen 7', color: '#ffb7b2', id: 7 }, { label: 'Gen 8', color: '#a8e6cf', id: 8 },
+    { label: 'Gen 9', color: '#ffffff', id: 9 }
+];
+
+const raritySegments = [
+    { label: 'Common', color: '#b2bec3', id: 'common' }, { label: 'Rare', color: '#74b9ff', id: 'rare' },
+    { label: 'Common', color: '#b2bec3', id: 'common' }, { label: 'Epic', color: '#a29bfe', id: 'epic' },
+    { label: 'Common', color: '#b2bec3', id: 'common' }, { label: 'Rare', color: '#74b9ff', id: 'rare' },
+    { label: 'Common', color: '#b2bec3', id: 'common' }, { label: 'Legendary', color: '#ff7675', id: 'legendary' }
+];
+
+let currentPhase = 'gen';
+let currentRotation = 0;
+let selectedGen = null;
+let selectedRarity = null;
+
+function drawWheelOnCanvas(canvas, segments) {
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = centerX;
+    const arc = (2 * Math.PI) / segments.length;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    segments.forEach((seg, i) => {
+        const startAngle = i * arc - Math.PI / 2 - arc / 2;
+        const endAngle = startAngle + arc;
+        
+        ctx.beginPath();
+        ctx.fillStyle = seg.color;
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.fill();
+        
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke(); 
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(i * arc - Math.PI / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#4a4a4a";
+        if(canvas.width > 150) { ctx.font = "bold 16px Fredoka"; ctx.fillText(seg.label, radius - 15, 6); } 
+        else { ctx.font = "bold 12px Fredoka"; ctx.fillText(seg.label, radius - 12, 4); }
+        ctx.restore();
+    });
+}
+
+function resetGame() {
+    currentPhase = 'gen';
+    document.getElementById('wheel-title').textContent = `🎀 Gen Wheel 🎀`;
+    document.getElementById('message').textContent = "Spin to pick a Generation!";
+    document.getElementById('reward-area').classList.add('hidden');
+    document.getElementById('multi-reward-area').classList.add('hidden');
+    document.getElementById('multi-spin-controls').classList.remove('hidden');
+    document.querySelector('.wheel-box').classList.remove('hidden');
+    document.getElementById('multi-wheel-grid').classList.add('hidden');
+    
+    const canvas = document.getElementById('wheel-canvas');
+    canvas.style.transition = 'none';
+    canvas.style.transform = `rotate(0deg)`;
+    currentRotation = 0;
+    
+    drawWheelOnCanvas(canvas, genSegments);
+    
+    const btn = document.getElementById('spinBtn');
+    btn.textContent = "SPIN!";
+    btn.disabled = false;
+    btn.classList.remove('hidden');
+    btn.onclick = spinWheel;
+}
+
+function getRandomRarity() {
+    let rand = Math.random();
+    let cumulative = 0;
+    for (let r of rarities) {
+        cumulative += r.chance;
+        if (rand <= cumulative) return r;
+    }
+    return rarities[0];
+}
+
+function spinWheel() {
+    playSound('spin');
+    const btn = document.getElementById('spinBtn');
+    const canvas = document.getElementById('wheel-canvas');
+    const message = document.getElementById('message');
+    const title = document.getElementById('wheel-title');
+    
+    btn.disabled = true;
+    document.getElementById('multi-spin-controls').classList.add('hidden');
+    
+    let winningIndex;
+    let winner;
+    const segments = currentPhase === 'gen' ? genSegments : raritySegments;
+
+    if (currentPhase === 'gen') {
+        winningIndex = Math.floor(Math.random() * segments.length);
+        winner = segments[winningIndex];
+    } else {
+        const chosenTier = getRandomRarity();
+        const matchingIndices = segments.map((s, idx) => s.id === chosenTier.id ? idx : -1).filter(idx => idx !== -1);
+        winningIndex = matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
+        winner = segments[winningIndex];
+    }
+    
+    const sliceAngle = 360 / segments.length;
+    const extraSpins = 5 * 360; 
+    const randomOffset = (Math.random() * sliceAngle * 0.8) - (sliceAngle * 0.4); 
+    const targetRotation = currentRotation + extraSpins + (360 - (winningIndex * sliceAngle)) - (currentRotation % 360) + randomOffset;
+    
+    message.textContent = `Spinning for ${currentPhase === 'gen' ? 'Generation' : 'Rarity'}... ✨`;
+    
+    canvas.style.transition = 'transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+    canvas.style.transform = `rotate(${targetRotation}deg)`;
+    currentRotation = targetRotation;
+    
+    setTimeout(() => {
+        if (currentPhase === 'gen') {
+            selectedGen = winner.id;
+            message.textContent = `Got ${winner.label}! Now spinning for Rarity... 🎀`;
+            title.textContent = `🎀 Rarity Wheel 🎀`;
+            
+            currentPhase = 'rarity';
+            playSound('open');
+            
+            setTimeout(() => {
+                canvas.style.transition = 'none'; 
+                canvas.style.transform = `rotate(0deg)`;
+                currentRotation = 0;
+                drawWheelOnCanvas(canvas, raritySegments);
+                
+                setTimeout(() => { spinWheel(); }, 100);
+            }, 1500);
+            
+        } else {
+            selectedRarity = winner.id; 
+            message.textContent = `Jackpot! 💖`;
+            playSound('win');
+            generatePokemonReward();
+            
+            btn.disabled = false;
+            btn.textContent = "PLAY AGAIN!";
+            btn.onclick = () => { playSound('click'); resetGame(); };
+        }
+    }, 3000); 
+}
+
+function getRandomNormal(start, end, excludeList) {
+    let id;
+    do { id = Math.floor(Math.random() * (end - start + 1)) + start; } while (excludeList.includes(id));
+    return id;
+}
+
+async function getRewardId(selectedRarity, selectedGen) {
+    const tier = rarityTiers[selectedRarity];
+    const [start, end] = genBounds[selectedGen];
+    const genLegendaries = legendaries.filter(id => id >= start && id <= end);
+    let baseId;
+    
+    if (tier.pool === 'legendary') {
+        baseId = genLegendaries.length > 0 ? genLegendaries[Math.floor(Math.random() * genLegendaries.length)] : getRandomNormal(start, end, genLegendaries);
+    } else {
+        baseId = getRandomNormal(start, end, genLegendaries);
+    }
+
+    let finalId = baseId;
+    if (Math.random() < 0.20) { 
+        try {
+            const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseId}`).then(r => r.json());
+            const alts = speciesData.varieties.filter(v => !v.is_default);
+            if (alts.length > 0) {
+                const chosen = alts[Math.floor(Math.random() * alts.length)];
+                finalId = parseInt(chosen.pokemon.url.split('/').slice(-2, -1)[0]);
+            }
+        } catch(e) {}
+    }
+    return { baseId, finalId };
+}
+
+async function generatePokemonReward() {
+    const { baseId, finalId } = await getRewardId(selectedRarity, selectedGen);
+    const tier = rarityTiers[selectedRarity];
+
+    if (!inventory[selectedRarity].includes(finalId)) inventory[selectedRarity].push(finalId);
+    if (!ownedSpecies.includes(baseId)) ownedSpecies.push(baseId); 
+    saveInventory();
+
+    const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${finalId}`).then(r => r.json());
+
+    document.getElementById('pokemon-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${finalId}.png`;
+    document.getElementById('cap-top').style.backgroundColor = tier.color;
+    document.getElementById('gen-badge').textContent = `Gen ${selectedGen}`;
+    
+    const rarityBadge = document.getElementById('rarity-badge');
+    rarityBadge.textContent = tier.name;
+    rarityBadge.style.backgroundColor = tier.color;
+
+    const typesContainer = document.getElementById('reward-types');
+    typesContainer.innerHTML = '';
+    pokeData.types.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'badge';
+        span.style.backgroundColor = getTypeColor(t.type.name);
+        span.textContent = t.type.name.toUpperCase();
+        typesContainer.appendChild(span);
+    });
+
+    const rewardArea = document.getElementById('reward-area');
+    rewardArea.classList.remove('hidden');
+    setTimeout(() => rewardArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+
+// --- Multi-Spin Feature ---
+function attemptMultiSpin(count, costTier) {
+    playSound('click');
+    openSelectionModal('spin', costTier, 1, (selectedIndices) => {
+        playSound('craft');
+        
+        selectedIndices.sort((a,b) => b - a).forEach(idx => {
+            inventory[costTier].splice(idx, 1);
+        });
+        saveInventory();
+
+        document.getElementById('spinBtn').classList.add('hidden');
+        document.querySelector('.wheel-box').classList.add('hidden');
+        document.getElementById('multi-spin-controls').classList.add('hidden');
+
+        const grid = document.getElementById('multi-wheel-grid');
+        grid.innerHTML = '';
+        grid.classList.remove('hidden');
+
+        const multiState = [];
+        for (let i = 0; i < count; i++) {
+            grid.innerHTML += `<div class="mini-wheel-box"><div class="mini-pointer">▼</div><canvas id="mini-wheel-${i}" width="140" height="140"></canvas></div>`;
+            multiState.push({ rotation: 0, gen: null, rarity: null });
+        }
+
+        setTimeout(() => {
+            for (let i = 0; i < count; i++) { drawWheelOnCanvas(document.getElementById(`mini-wheel-${i}`), genSegments); }
+            executeMultiSpin(count, multiState, 'gen');
+        }, 50);
+    });
+}
+
+function executeMultiSpin(count, state, phase) {
+    playSound('spin');
+    const segments = phase === 'gen' ? genSegments : raritySegments;
+    document.getElementById('message').textContent = `Spinning ${phase === 'gen' ? 'Generations' : 'Rarities'}... ✨`;
+    document.getElementById('wheel-title').textContent = phase === 'gen' ? `🎀 Multi-Gen Wheels 🎀` : `🎀 Multi-Rarity Wheels 🎀`;
+
+    for (let i = 0; i < count; i++) {
+        const canvas = document.getElementById(`mini-wheel-${i}`);
+        let winningIndex, winner;
+
+        if (phase === 'gen') {
+            winningIndex = Math.floor(Math.random() * segments.length);
+            winner = segments[winningIndex];
+            state[i].gen = winner.id;
+        } else {
+            const chosenTier = getRandomRarity();
+            const matchingIndices = segments.map((s, idx) => s.id === chosenTier.id ? idx : -1).filter(idx => idx !== -1);
+            winningIndex = matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
+            winner = segments[winningIndex];
+            state[i].rarity = winner.id;
+        }
+
+        const sliceAngle = 360 / segments.length;
+        const extraSpins = (Math.floor(Math.random() * 3) + 3) * 360; 
+        const targetRotation = state[i].rotation + extraSpins + (360 - (winningIndex * sliceAngle)) - (state[i].rotation % 360);
+
+        canvas.style.transition = `transform ${2 + Math.random()}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
+        canvas.style.transform = `rotate(${targetRotation}deg)`;
+        state[i].rotation = targetRotation;
+    }
+
+    setTimeout(() => {
+        if (phase === 'gen') {
+            playSound('open');
+            for (let i = 0; i < count; i++) {
+                const canvas = document.getElementById(`mini-wheel-${i}`);
+                canvas.style.transition = 'none';
+                canvas.style.transform = 'rotate(0deg)';
+                state[i].rotation = 0;
+                drawWheelOnCanvas(canvas, raritySegments);
+            }
+            setTimeout(() => executeMultiSpin(count, state, 'rarity'), 500);
+        } else {
+            generateMultiRewards(state);
+        }
+    }, 3500);
+}
+
+async function generateMultiRewards(state) {
+    playSound('win');
+    document.getElementById('message').textContent = `Mega Jackpot! 💖`;
+    document.getElementById('multi-wheel-grid').classList.add('hidden');
+
+    const rewardArea = document.getElementById('multi-reward-area');
+    rewardArea.innerHTML = '';
+    rewardArea.classList.remove('hidden');
+
+    const rewardPromises = state.map(res => getRewardId(res.rarity, res.gen).then(async data => {
+        const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${data.finalId}`).then(r => r.json());
+        return { ...res, ...data, pokeData };
+    }));
+    const finalRewards = await Promise.all(rewardPromises);
+
+    finalRewards.forEach(res => {
+        const tier = rarityTiers[res.rarity];
+        if (!inventory[res.rarity].includes(res.finalId)) inventory[res.rarity].push(res.finalId);
+        if (!ownedSpecies.includes(res.baseId)) ownedSpecies.push(res.baseId);
+
+        let typesHTML = res.pokeData.types.map(t => `<span class="badge" style="background-color:${getTypeColor(t.type.name)}">${t.type.name.toUpperCase()}</span>`).join('');
+
+        rewardArea.innerHTML += `
+            <div class="mini-reward-card">
+                <div class="mini-capsule" style="border-color:#3d3d3d">
+                    <div class="mini-cap-top" style="background-color:${tier.color}"></div>
+                    <div class="mini-cap-bottom"></div>
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${res.finalId}.png">
+                </div>
+                <span class="badge" style="background-color:${tier.color}; font-size:10px; margin: 2px 0;">${tier.name}</span>
+                <div class="mini-reward-types">${typesHTML}</div>
+            </div>
+        `;
+    });
+    saveInventory();
+    setTimeout(() => rewardArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+
+    const btn = document.getElementById('spinBtn');
+    btn.textContent = "PLAY AGAIN!";
+    btn.disabled = false;
+    btn.classList.remove('hidden');
+    btn.onclick = () => { playSound('click'); resetGame(); };
+}
+
+
+// --- Inventory & Crafting Logic ---
+function renderInventory() {
+    const content = document.getElementById('inventory-content');
+    content.innerHTML = ''; 
+
+    Object.keys(rarityTiers).forEach(tierKey => {
+        const tier = rarityTiers[tierKey];
+        const items = inventory[tierKey];
+        const unfavoritedCount = items.filter(id => !favorites.includes(id)).length;
+        const canCraft = tier.next !== null && unfavoritedCount >= 5;
+
+        const section = document.createElement('div');
+        section.classList.add('inv-tier-section');
+        section.style.borderColor = tier.color;
+
+        const header = document.createElement('div');
+        header.classList.add('inv-tier-header');
+        
+        let titleHTML = `<span class="badge" style="background-color:${tier.color}">${tier.name}</span> (${items.length})`;
+        let btnHTML = tier.next ? `<button class="craft-btn" ${canCraft ? '' : 'disabled'} onclick="craftPokemon('${tierKey}')">Craft ${rarityTiers[tier.next].name} (5)</button>` : '';
+        
+        header.innerHTML = `<h3>${titleHTML}</h3> ${btnHTML}`;
+        section.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.classList.add('inv-grid');
+        
+        items.forEach(id => {
+            const isFav = favorites.includes(id);
+            const box = document.createElement('div');
+            box.classList.add('inv-item');
+            box.style.borderColor = tier.color;
+            box.innerHTML = `
+                <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${id})">
+                    ${isFav ? '❤️' : '🤍'}
+                </button>
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png" alt="poke">
+            `;
+            grid.appendChild(box);
+        });
+
+        if(items.length === 0) grid.innerHTML = `<p style="color:#aaa; font-size:12px; grid-column: 1/-1; text-align:left;">No Pokémon yet...</p>`;
+
+        section.appendChild(grid);
+        content.appendChild(section);
+    });
+}
+
+function craftPokemon(fromTierKey) {
+    openSelectionModal('craft', fromTierKey, 5, async (selectedIndices) => {
+        playSound('craft');
+        const toTierKey = rarityTiers[fromTierKey].next;
+        const toTier = rarityTiers[toTierKey];
+        
+        const sacrificedIds = selectedIndices.map(idx => inventory[fromTierKey][idx]);
+        selectedIndices.sort((a,b) => b - a).forEach(idx => inventory[fromTierKey].splice(idx, 1));
+        
+        const randomGen = Math.floor(Math.random() * 9) + 1;
+        const { baseId, finalId } = await getRewardId(toTierKey, randomGen);
+        
+        inventory[toTierKey].push(finalId);
+        if (!ownedSpecies.includes(baseId)) ownedSpecies.push(baseId);
+        saveInventory();
+        renderInventory();
+        
+        const vortex = document.getElementById('craft-vortex');
+        vortex.innerHTML = '';
+        sacrificedIds.forEach(id => {
+            vortex.innerHTML += `<img class="craft-particle" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png">`;
+        });
+        
+        document.getElementById('craft-anim-modal').classList.remove('hidden');
+
+        setTimeout(() => {
+            document.getElementById('craft-anim-modal').classList.add('hidden');
+            playSound('win');
+            
+            document.getElementById('craft-tier-name').textContent = toTier.name;
+            document.getElementById('craft-tier-name').style.color = toTier.color;
+            document.getElementById('craft-cap-top').style.backgroundColor = toTier.color;
+            document.getElementById('craft-pokemon-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${finalId}.png`;
+            
+            document.getElementById('craft-modal').classList.remove('hidden');
+        }, 2000);
+    });
+}
+
+function closeCraftModal() {
+    playSound('click');
+    document.getElementById('craft-modal').classList.add('hidden');
+}
+
+
+// --- Pokédex Logic (With Shiny & Forms) ---
+let isShinyView = false;
+let currentPokeData = null;
+
+document.getElementById('dex-gen-select').addEventListener('change', () => playSound('click'));
+
+function renderPokedexGrid() {
+    const gen = parseInt(document.getElementById('dex-gen-select').value);
+    const grid = document.getElementById('pokedex-grid');
+    grid.innerHTML = '';
+    
+    const [start, end] = genBounds[gen];
+    let ownedInGen = 0;
+    
+    for (let id = start; id <= end; id++) {
+        const owned = ownedSpecies.includes(id) || isPokemonOwned(id);
+        const isFav = favorites.includes(id); 
+        if (owned) ownedInGen++;
+        
+        const box = document.createElement('div');
+        box.className = `dex-item ${owned ? '' : 'unowned'}`;
+        box.onclick = () => { playSound('click'); openDexModal(id); };
+        
+        box.innerHTML = `
+            <span class="dex-id-label">#${id}</span>
+            ${owned && isFav ? '<span class="dex-fav-heart">❤️</span>' : ''}
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png" alt="poke">
+        `;
+        grid.appendChild(box);
+    }
+    
+    document.getElementById('dex-progress').textContent = `${ownedInGen} / ${end - start + 1} Owned`;
+}
+
+async function openDexModal(baseId) {
+    document.getElementById('dex-modal').classList.remove('hidden');
+    playSound('open');
+    isShinyView = false; 
+    document.getElementById('dex-loading').classList.remove('hidden');
+    document.getElementById('dex-content').classList.add('hidden');
+    
+    try {
+        const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseId}`).then(res => res.json());
+        
+        const formContainer = document.getElementById('dex-forms');
+        formContainer.innerHTML = '';
+        
+        speciesData.varieties.forEach((v, idx) => {
+            const vId = parseInt(v.pokemon.url.split('/').slice(-2, -1)[0]);
+            const isBase = v.is_default;
+            const ownsThisForm = isPokemonOwned(vId);
+            const ownsAnyForm = ownedSpecies.includes(baseId) || isPokemonOwned(baseId);
+            
+            if (ownsThisForm || (isBase && ownsAnyForm) || !ownsAnyForm) {
+                const btn = document.createElement('button');
+                btn.className = `form-btn ${idx === 0 ? 'active' : ''}`;
+                btn.textContent = v.pokemon.name.replace(speciesData.name + '-', '').replace(speciesData.name, 'Base').toUpperCase();
+                btn.onclick = () => {
+                    playSound('click');
+                    document.querySelectorAll('.form-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    loadFormData(vId, ownsThisForm || (isBase && ownsAnyForm), speciesData);
+                };
+                formContainer.appendChild(btn);
+            }
+        });
+
+        const defaultVariety = speciesData.varieties.find(v => v.is_default);
+        const defaultId = parseInt(defaultVariety.pokemon.url.split('/').slice(-2, -1)[0]);
+        
+        await loadFormData(defaultId, isPokemonOwned(defaultId) || ownedSpecies.includes(baseId), speciesData);
+
+        document.getElementById('dex-loading').classList.add('hidden');
+        document.getElementById('dex-content').classList.remove('hidden');
+    } catch(err) {
+        document.getElementById('dex-loading').textContent = "Failed to load data 😢";
+    }
+}
+
+async function loadFormData(id, isOwned, speciesData) {
+    const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then(res => res.json());
+    currentPokeData = pokeData;
+    
+    document.getElementById('dex-name').textContent = pokeData.name.charAt(0).toUpperCase() + pokeData.name.slice(1).replace('-', ' ');
+    
+    const badge = document.getElementById('dex-ownership-badge');
+    if (isOwned) {
+        badge.textContent = "Owned 💖";
+        badge.style.backgroundColor = "#ff7b89";
+    } else {
+        badge.textContent = "Unowned 🔒";
+        badge.style.backgroundColor = "#b2bec3";
+    }
+
+    const favBtn = document.getElementById('dex-fav-btn');
+    if (isOwned) {
+        favBtn.classList.remove('hidden');
+        const isFav = favorites.includes(id);
+        favBtn.innerHTML = isFav ? "❤️ Favorited" : "🤍 Favorite";
+        if(isFav) favBtn.classList.add('active'); else favBtn.classList.remove('active');
+        favBtn.onclick = () => { 
+            toggleFavorite(id); 
+            const updatedFav = favorites.includes(id);
+            favBtn.innerHTML = updatedFav ? "❤️ Favorited" : "🤍 Favorite";
+            if(updatedFav) favBtn.classList.add('active'); else favBtn.classList.remove('active');
+        };
+    } else {
+        favBtn.classList.add('hidden');
+    }
+    
+    updateDexImage();
+    
+    const typesContainer = document.getElementById('dex-types');
+    typesContainer.innerHTML = '';
+    pokeData.types.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'badge';
+        span.style.backgroundColor = getTypeColor(t.type.name);
+        span.textContent = t.type.name.toUpperCase();
+        typesContainer.appendChild(span);
+    });
+    
+    const enEntry = speciesData.flavor_text_entries.find(e => e.language.name === 'en');
+    document.getElementById('dex-desc').textContent = enEntry ? enEntry.flavor_text.replace(/[\n\f]/g, ' ') : "No description available.";
+    
+    const maxStat = 255; 
+    const getStat = (name) => pokeData.stats.find(s => s.stat.name === name).base_stat;
+    const stats = {
+        'hp': getStat('hp'), 'atk': getStat('attack'), 'def': getStat('defense'),
+        'spa': getStat('special-attack'), 'spd': getStat('special-defense'), 'spe': getStat('speed')
+    };
+
+    for (const [key, val] of Object.entries(stats)) {
+        document.getElementById(`stat-${key}`).style.width = `${(val / maxStat) * 100}%`;
+        document.getElementById(`val-${key}`).textContent = val;
+    }
+}
+
+function toggleShiny() {
+    playSound('click');
+    isShinyView = !isShinyView;
+    updateDexImage();
+}
+
+function updateDexImage() {
+    if (!currentPokeData) return;
+    const sprites = currentPokeData.sprites;
+    const shinyBtn = document.getElementById('dex-shiny-btn');
+    
+    if (isShinyView) {
+        shinyBtn.classList.add('active');
+        const animated = sprites.other?.showdown?.front_shiny;
+        const staticImg = sprites.front_shiny || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${currentPokeData.id}.png`;
+        document.getElementById('dex-detail-img').src = animated || staticImg;
+    } else {
+        shinyBtn.classList.remove('active');
+        const animated = sprites.other?.showdown?.front_default;
+        const staticImg = sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentPokeData.id}.png`;
+        document.getElementById('dex-detail-img').src = animated || staticImg;
+    }
+}
+
+function closeDexModal() {
+    playSound('click');
+    document.getElementById('dex-modal').classList.add('hidden');
+}
+
+function getTypeColor(type) {
+    const colors = { normal: '#A8A77A', fire: '#EE8130', water: '#6390F0', electric: '#F7D02C', grass: '#7AC74C', ice: '#96D9D6', fighting: '#C22E28', poison: '#A33EA1', ground: '#E2BF65', flying: '#A98FF3', psychic: '#F95587', bug: '#A6B91A', rock: '#B6A136', ghost: '#735797', dragon: '#6F35FC', dark: '#705746', steel: '#B7B7CE', fairy: '#D685AD' };
+    return colors[type] || '#74b9ff';
+}
+</script>
+</body>
+</html>
