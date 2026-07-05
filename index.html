@@ -382,12 +382,12 @@ button:disabled { background-color: #ccc; box-shadow: 0 6px 0 #aaa; cursor: not-
     <script>
 // --- Audio System ---
 const sfx = {
-    bgm: new Audio('sounds/bgm.mp3'),
-    click: new Audio('sounds/click.mp3'),
-    spin: new Audio('sounds/spin.mp3'),
-    win: new Audio('sounds/win.mp3'),
-    craft: new Audio('sounds/craft.mp3'),
-    open: new Audio('sounds/open.mp3')
+    bgm: new Audio('./bgm.mp3'),
+    click: new Audio('./click.mp3'),
+    spin: new Audio('./spin.mp3'),
+    win: new Audio('./win.mp3'),
+    craft: new Audio('./craft.mp3'),
+    open: new Audio('./open.mp3')
 };
 
 Object.values(sfx).forEach(audio => audio.volume = 0.5);
