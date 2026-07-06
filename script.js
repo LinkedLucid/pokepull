@@ -52,6 +52,9 @@ function playSound(type) {
 
 // --- Constants & Data ---
 const MAX_POKEMON = 1025;
+const APP_VERSION = '3.0';
+const STORAGE_VERSION_KEY = 'appVersion';
+const STORAGE_KEYS = ['pokeInventory', 'pokeSpecies', 'fruitInventory', 'pokeFavs'];
 const genBounds = {
     1: [1, 151], 2: [152, 251], 3: [252, 386],
     4: [387, 493], 5: [494, 649], 6: [650, 721],
@@ -388,6 +391,43 @@ function saveInventory() {
     localStorage.setItem('fruitInventory', JSON.stringify(fruitInventory));
 }
 
+function markVersionInstalled() {
+    localStorage.setItem(STORAGE_VERSION_KEY, APP_VERSION);
+}
+
+function hasExistingSaveData() {
+    return STORAGE_KEYS.some(key => localStorage.getItem(key) !== null);
+}
+
+function showWelcomeModal() {
+    document.getElementById('welcome-modal')?.classList.remove('hidden');
+}
+
+function showResetModal() {
+    document.getElementById('reset-modal')?.classList.remove('hidden');
+}
+
+function hideVersionModals() {
+    document.getElementById('welcome-modal')?.classList.add('hidden');
+    document.getElementById('reset-modal')?.classList.add('hidden');
+}
+
+function handleVersionCheck() {
+    const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
+    const hasData = hasExistingSaveData();
+
+    if (storedVersion === APP_VERSION) {
+        return;
+    }
+
+    if (!storedVersion && !hasData) {
+        showWelcomeModal();
+        return;
+    }
+
+    showResetModal();
+}
+
 function normalizeFruitInventory(rawFruitInventory) {
     const baseInventory = { common: [], uncommon: [], rare: [], epic: [], legendary: [] };
     const source = rawFruitInventory || {};
@@ -574,6 +614,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('main-menu').classList.remove('hidden');
         document.getElementById('btn-bag').classList.remove('hidden');
         playSound('open');
+        handleVersionCheck();
     }, 2500);
 });
 
@@ -765,12 +806,30 @@ let devOverrides = {
 
 function setupDeveloperMode() {
     const toggleBtn = document.getElementById('dev-toggle-btn');
+    const welcomeStartBtn = document.getElementById('welcome-start-btn');
+    const resetStorageBtn = document.getElementById('reset-storage-btn');
     const panel = document.getElementById('dev-panel');
     const applyBtn = document.getElementById('dev-apply-btn');
     const clearBtn = document.getElementById('dev-clear-btn');
     const clearDataBtn = document.getElementById('dev-clear-data-btn');
 
     if (!toggleBtn || !panel || !applyBtn || !clearBtn) return;
+
+    welcomeStartBtn?.addEventListener('click', () => {
+        markVersionInstalled();
+        hideVersionModals();
+    });
+
+    resetStorageBtn?.addEventListener('click', () => {
+        STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+        inventory = normalizeInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [], mythical: [], umbra: [] });
+        ownedSpecies = [];
+        speciesPoints = {};
+        fruitInventory = normalizeFruitInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [] });
+        favorites = [];
+        markVersionInstalled();
+        hideVersionModals();
+    });
 
     toggleBtn.addEventListener('click', () => {
         devModeEnabled = !devModeEnabled;
@@ -822,6 +881,7 @@ function setupDeveloperMode() {
                 speciesPoints = {};
                 fruitInventory = normalizeFruitInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [] });
                 favorites = [];
+                markVersionInstalled();
                 updateDevStatus();
                 document.getElementById('dev-status').textContent = '\u2705 All data cleared! Refresh the page to see changes.';
             }

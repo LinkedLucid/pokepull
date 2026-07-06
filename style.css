@@ -350,7 +350,10 @@ button:disabled { background-color: #ccc; box-shadow: 0 6px 0 #aaa; cursor: not-
 #screen-inventory.crafting-active .inventory-machine { filter: blur(6px) saturate(0.9); transition: filter 0.2s ease; }
 .modal.hidden .modal-content { transform: scale(0.7); }
 .modal-content h3 { color: #ff7b89; margin-top: 0; margin-bottom: 10px; font-size: 24px;}
+.welcome-modal-content { width: min(380px, 90vw); }
+.welcome-modal-content p { margin-bottom: 16px; color: #666; line-height: 1.5; }
 .close-btn { position: absolute; top: -15px; right: -15px; width: 40px; height: 40px; padding: 0; background: #ffb7b2; border-radius: 50%; font-size: 18px; line-height: 40px; }
+.version-badge { position: fixed; left: 14px; bottom: 12px; z-index: 130; background: rgba(255,255,255,0.9); color: #ff7b89; border: 2px solid #a8e6cf; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
 
 /* SELECTION MODAL STYLES */
 .select-modal-content { width: 400px; }

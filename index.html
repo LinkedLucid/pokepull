@@ -107,6 +107,22 @@
         </div>
     </div>
 
+    <div id="welcome-modal" class="modal hidden">
+        <div class="modal-content welcome-modal-content">
+            <h3>✨ Welcome to 3.0 ✨</h3>
+            <p>Your adventure is ready for a fresh start with the latest update.</p>
+            <button id="welcome-start-btn" type="button">Let's Go!</button>
+        </div>
+    </div>
+
+    <div id="reset-modal" class="modal hidden">
+        <div class="modal-content welcome-modal-content">
+            <h3>🧹 Update Detected</h3>
+            <p>Your saved data looks from an older version. Clear your old save to enjoy the latest features smoothly.</p>
+            <button id="reset-storage-btn" type="button">Delete Old Save</button>
+        </div>
+    </div>
+
     <div id="main-menu" class="screen hidden">
         <div class="menu-container">
             <h2>🎀 Minigame Hub 🎀</h2>
@@ -154,8 +170,8 @@
                 <button onclick="attemptMultiSpin(3, 'uncommon')" class="multi-btn rare-btn">x3 Spin (Cost: 1 Uncommon)</button>
                 <button onclick="attemptMultiSpin(7, 'rare')" class="multi-btn epic-btn">x7 Spin (Cost: 1 Rare)</button>
                 <button onclick="attemptMultiSpin(15, 'epic')" class="multi-btn legendary-btn">x15 Spin (Cost: 1 Epic)</button>
-                <button onclick="attemptMultiSpin(30, 'legendary')" class="multi-btn mythical-btn">x30 Spin (Cost: 1 Legendary)</button>
-                <button onclick="attemptMultiSpin(60, 'mythical')" class="multi-btn umbra-btn">x60 Spin (Cost: 1 Mythical)</button>
+                <button onclick="attemptMultiSpin(30, 'legendary')" class="multi-btn legendary-btn">x30 Spin (Cost: 1 Legendary)</button>
+                <button onclick="attemptMultiSpin(60, 'mythical')" class="multi-btn legendary-btn">x60 Spin (Cost: 1 Mythical)</button>
             </div>
 
             <div class="wheel-box">
