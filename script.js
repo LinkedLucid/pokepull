@@ -55,6 +55,262 @@ const MAX_POKEMON = 1025;
 const APP_VERSION = '3.0';
 const STORAGE_VERSION_KEY = 'appVersion';
 const STORAGE_KEYS = ['pokeInventory', 'pokeSpecies', 'fruitInventory', 'pokeFavs'];
+const STORAGE_SPRITE_MODE_KEY = 'spriteMode';
+const STORAGE_USER_NAME_KEY = 'userName';
+const STORAGE_USER_THEME_KEY = 'userTheme';
+const SPRITE_MODES = { NORMAL: 'normal', ANIMATED_2D: 'animated-2d', SHOWDOWN: 'showdown' };
+const THEME_GROUPS = {
+    SPECIAL: 'special',
+    MODERN: 'modern'
+};
+const DEFAULT_THEME_PRESETS = {
+    SPECIAL: 'special-cotton',
+    MODERN: 'modern-aurora'
+};
+const THEME_PALETTES = {
+    [THEME_GROUPS.SPECIAL]: {
+        'special-cotton': { label: 'Cotton Cloud', bgPrimary: '#fff7f4', bgSecondary: '#ffe9ea', textPrimary: '#5a3d3f', accentPrimary: '#ff7b89', accentSecondary: '#ffb6c1', shadowLight: '#f3d0d5', surfacePanel: 'rgba(255, 248, 245, 0.94)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#fffdfb', surfaceMuted: 'rgba(255, 241, 239, 0.88)', borderSoft: '#ffd7dc', borderStrong: '#ff9fb0', textMuted: '#8a676b', textInverse: '#ffffff' },
+        'special-sakura': { label: 'Sakura Bloom', bgPrimary: '#fff3f7', bgSecondary: '#ffe0e8', textPrimary: '#6a3542', accentPrimary: '#ff6f91', accentSecondary: '#f7b7c8', shadowLight: '#f8dce7', surfacePanel: 'rgba(255, 245, 248, 0.95)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#fffdfd', surfaceMuted: 'rgba(255, 239, 245, 0.9)', borderSoft: '#f6c9d8', borderStrong: '#ff8cb0', textMuted: '#8d6070', textInverse: '#ffffff' },
+        'special-lilac': { label: 'Lilac Dream', bgPrimary: '#f8f2ff', bgSecondary: '#efe2ff', textPrimary: '#5f4b6f', accentPrimary: '#b58cff', accentSecondary: '#d6b8ff', shadowLight: '#e9d9ff', surfacePanel: 'rgba(248, 242, 255, 0.95)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#ffffff', surfaceMuted: 'rgba(239, 226, 255, 0.88)', borderSoft: '#e2cfff', borderStrong: '#c79aff', textMuted: '#7d6a90', textInverse: '#ffffff' },
+        'special-bubble': { label: 'Bubblegum Pop', bgPrimary: '#fff7fc', bgSecondary: '#ffe6f3', textPrimary: '#6b3f5a', accentPrimary: '#ff7fb3', accentSecondary: '#ffd0e7', shadowLight: '#f9d5ea', surfacePanel: 'rgba(255, 247, 250, 0.96)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#fffcfe', surfaceMuted: 'rgba(255, 230, 243, 0.86)', borderSoft: '#ffd8ec', borderStrong: '#ff9ec9', textMuted: '#8b6480', textInverse: '#ffffff' },
+        'special-berry': { label: 'Berry Charm', bgPrimary: '#fcf0ff', bgSecondary: '#f4dcff', textPrimary: '#593b61', accentPrimary: '#a14dff', accentSecondary: '#e0b2ff', shadowLight: '#ead1ff', surfacePanel: 'rgba(252, 240, 255, 0.95)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#ffffff', surfaceMuted: 'rgba(244, 220, 255, 0.88)', borderSoft: '#ecd2ff', borderStrong: '#c487ff', textMuted: '#7c638b', textInverse: '#ffffff' },
+        'special-caramel': { label: 'Caramel Glow', bgPrimary: '#fff7eb', bgSecondary: '#ffe6c7', textPrimary: '#6b4827', accentPrimary: '#d08b3f', accentSecondary: '#ffc97c', shadowLight: '#f7e0be', surfacePanel: 'rgba(255, 247, 235, 0.95)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#fffdf9', surfaceMuted: 'rgba(255, 230, 199, 0.88)', borderSoft: '#f8dcb2', borderStrong: '#f0b467', textMuted: '#8b6b43', textInverse: '#ffffff' },
+        'special-mint': { label: 'Mint Breeze', bgPrimary: '#f4fff8', bgSecondary: '#dcffe7', textPrimary: '#355844', accentPrimary: '#4ecb8f', accentSecondary: '#91edbe', shadowLight: '#d2f3de', surfacePanel: 'rgba(244, 255, 248, 0.95)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#fcfffd', surfaceMuted: 'rgba(220, 255, 231, 0.86)', borderSoft: '#cdeed7', borderStrong: '#74cf9d', textMuted: '#5f7d6b', textInverse: '#ffffff' },
+        'special-starlight': { label: 'Starlight Lace', bgPrimary: '#f4f7ff', bgSecondary: '#e0ebff', textPrimary: '#455574', accentPrimary: '#5e8cff', accentSecondary: '#a8c4ff', shadowLight: '#dce8ff', surfacePanel: 'rgba(244, 247, 255, 0.95)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#fcfdff', surfaceMuted: 'rgba(224, 235, 255, 0.88)', borderSoft: '#dce7ff', borderStrong: '#8fb4ff', textMuted: '#667797', textInverse: '#ffffff' },
+        'special-rainbow': { label: 'Rainbow Sprinkles', bgPrimary: '#fffef2', bgSecondary: '#fff0b3', textPrimary: '#6e4f3a', accentPrimary: '#ff7f50', accentSecondary: '#ffbf69', shadowLight: '#fce9b9', surfacePanel: 'rgba(255, 254, 242, 0.95)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#fffefc', surfaceMuted: 'rgba(255, 240, 179, 0.88)', borderSoft: '#fff0ba', borderStrong: '#ffb96e', textMuted: '#8a6d53', textInverse: '#ffffff' },
+        'special-dream': { label: 'Dreamy Mauve', bgPrimary: '#fcf3ff', bgSecondary: '#f5dbff', textPrimary: '#6a3e65', accentPrimary: '#c46edb', accentSecondary: '#e8b7ff', shadowLight: '#f0d5ff', surfacePanel: 'rgba(252, 243, 255, 0.95)', surfaceElevated: 'rgba(255, 255, 255, 0.98)', surfaceCard: '#ffffff', surfaceMuted: 'rgba(245, 219, 255, 0.88)', borderSoft: '#edd1ff', borderStrong: '#d191eb', textMuted: '#805c81', textInverse: '#ffffff' }
+    },
+    [THEME_GROUPS.MODERN]: {
+        'modern-aurora': { label: 'Aurora', bgPrimary: '#07111f', bgSecondary: '#0f172a', textPrimary: '#e2e8f0', accentPrimary: '#7dd3fc', accentSecondary: '#38bdf8', shadowLight: '#1e293b', surfacePanel: 'rgba(10, 19, 34, 0.96)', surfaceElevated: 'rgba(15, 23, 42, 0.98)', surfaceCard: '#111c2f', surfaceMuted: 'rgba(125, 211, 252, 0.08)', borderSoft: 'rgba(125, 211, 252, 0.18)', borderStrong: 'rgba(125, 211, 252, 0.28)', textMuted: '#cbd5e1', textInverse: '#ffffff' },
+        'modern-obsidian': { label: 'Obsidian', bgPrimary: '#020202', bgSecondary: '#0d0d0d', textPrimary: '#f3f4f6', accentPrimary: '#f3f4f6', accentSecondary: '#6b7280', shadowLight: '#2a2a2a', surfacePanel: 'rgba(18, 18, 18, 0.97)', surfaceElevated: 'rgba(24, 24, 24, 0.98)', surfaceCard: '#1b1b1b', surfaceMuted: 'rgba(255, 255, 255, 0.05)', borderSoft: 'rgba(255, 255, 255, 0.12)', borderStrong: 'rgba(255, 255, 255, 0.2)', textMuted: '#b7bec7', textInverse: '#ffffff' },
+        'modern-ember': { label: 'Ember', bgPrimary: '#1b0f0f', bgSecondary: '#291111', textPrimary: '#fef2f2', accentPrimary: '#fb923c', accentSecondary: '#f43f5e', shadowLight: '#3f1d1d', surfacePanel: 'rgba(29, 14, 14, 0.96)', surfaceElevated: 'rgba(41, 17, 17, 0.98)', surfaceCard: '#2b1717', surfaceMuted: 'rgba(251, 146, 60, 0.08)', borderSoft: 'rgba(251, 146, 60, 0.2)', borderStrong: 'rgba(244, 63, 94, 0.24)', textMuted: '#f7c8c8', textInverse: '#ffffff' },
+        'modern-ice': { label: 'Iceglass', bgPrimary: '#f4f7fb', bgSecondary: '#e9eef6', textPrimary: '#1f2937', accentPrimary: '#0f766e', accentSecondary: '#38bdf8', shadowLight: '#d4dce7', surfacePanel: 'rgba(255, 255, 255, 0.96)', surfaceElevated: 'rgba(248, 250, 252, 0.98)', surfaceCard: '#ffffff', surfaceMuted: 'rgba(15, 23, 42, 0.04)', borderSoft: 'rgba(15, 23, 42, 0.1)', borderStrong: 'rgba(15, 23, 42, 0.16)', textMuted: '#64748b', textInverse: '#ffffff' },
+        'modern-sage': { label: 'Sage', bgPrimary: '#111815', bgSecondary: '#17231f', textPrimary: '#f2f8f2', accentPrimary: '#8bc34a', accentSecondary: '#4caf50', shadowLight: '#253529', surfacePanel: 'rgba(20, 29, 24, 0.96)', surfaceElevated: 'rgba(24, 33, 28, 0.98)', surfaceCard: '#1d2922', surfaceMuted: 'rgba(139, 195, 74, 0.08)', borderSoft: 'rgba(139, 195, 74, 0.18)', borderStrong: 'rgba(76, 175, 80, 0.22)', textMuted: '#b8cdb7', textInverse: '#ffffff' },
+        'modern-ocean': { label: 'Ocean', bgPrimary: '#071b24', bgSecondary: '#0d2a33', textPrimary: '#f4fbff', accentPrimary: '#2dd4bf', accentSecondary: '#38bdf8', shadowLight: '#113847', surfacePanel: 'rgba(8, 24, 32, 0.96)', surfaceElevated: 'rgba(13, 34, 44, 0.98)', surfaceCard: '#112b35', surfaceMuted: 'rgba(45, 212, 191, 0.09)', borderSoft: 'rgba(45, 212, 191, 0.18)', borderStrong: 'rgba(56, 189, 248, 0.22)', textMuted: '#c5e7eb', textInverse: '#ffffff' },
+        'modern-violet': { label: 'Violet', bgPrimary: '#17111f', bgSecondary: '#22152f', textPrimary: '#f5efff', accentPrimary: '#a78bfa', accentSecondary: '#c084fc', shadowLight: '#372946', surfacePanel: 'rgba(25, 18, 33, 0.96)', surfaceElevated: 'rgba(34, 21, 47, 0.98)', surfaceCard: '#24182e', surfaceMuted: 'rgba(167, 139, 250, 0.08)', borderSoft: 'rgba(167, 139, 250, 0.18)', borderStrong: 'rgba(192, 132, 252, 0.24)', textMuted: '#e0d0ff', textInverse: '#ffffff' },
+        'modern-coral': { label: 'Coral', bgPrimary: '#191111', bgSecondary: '#241313', textPrimary: '#fef2f2', accentPrimary: '#ff7d7d', accentSecondary: '#f59e0b', shadowLight: '#4a2525', surfacePanel: 'rgba(29, 17, 17, 0.96)', surfaceElevated: 'rgba(36, 19, 19, 0.98)', surfaceCard: '#2c1919', surfaceMuted: 'rgba(255, 125, 125, 0.08)', borderSoft: 'rgba(255, 125, 125, 0.2)', borderStrong: 'rgba(245, 158, 11, 0.24)', textMuted: '#f5c3c3', textInverse: '#ffffff' },
+        'modern-sunset': { label: 'Sunset', bgPrimary: '#18110d', bgSecondary: '#24160d', textPrimary: '#fff7ed', accentPrimary: '#fdba74', accentSecondary: '#fb923c', shadowLight: '#3a2417', surfacePanel: 'rgba(29, 18, 13, 0.96)', surfaceElevated: 'rgba(36, 22, 13, 0.98)', surfaceCard: '#2b1c13', surfaceMuted: 'rgba(253, 186, 116, 0.08)', borderSoft: 'rgba(253, 186, 116, 0.2)', borderStrong: 'rgba(251, 146, 60, 0.24)', textMuted: '#f8dac3', textInverse: '#ffffff' },
+        'modern-forest': { label: 'Forest', bgPrimary: '#0d1511', bgSecondary: '#132017', textPrimary: '#effcf2', accentPrimary: '#6ee7b7', accentSecondary: '#4ade80', shadowLight: '#223626', surfacePanel: 'rgba(14, 23, 17, 0.96)', surfaceElevated: 'rgba(19, 32, 23, 0.98)', surfaceCard: '#15231b', surfaceMuted: 'rgba(110, 231, 183, 0.08)', borderSoft: 'rgba(110, 231, 183, 0.18)', borderStrong: 'rgba(74, 222, 128, 0.24)', textMuted: '#cbead7', textInverse: '#ffffff' }
+    }
+};
+
+// Hidden special names that trigger password prompt
+const SPECIAL_NAMES = ['leen', 'harleen', 'darling', 'bebsy', 'honey', 'baby', 'cupcake', 'muffin'];
+const SPECIAL_PASSWORD = 'march21';
+const DEV_MENU_PASSWORD = 'july4';
+
+let spriteMode = localStorage.getItem(STORAGE_SPRITE_MODE_KEY) || SPRITE_MODES.NORMAL;
+let userName = localStorage.getItem(STORAGE_USER_NAME_KEY) || '';
+let userTheme = normalizeThemePreset(localStorage.getItem(STORAGE_USER_THEME_KEY));
+
+const pokemonDataCache = new Map();
+const speciesDataCache = new Map();
+const spriteUrlCache = new Map();
+const pendingSpriteLoads = new Map();
+
+async function fetchJsonWithTimeout(url, { timeout = 4000, signal } = {}) {
+    const controller = signal ? null : new AbortController();
+    const activeSignal = signal || controller.signal;
+    const timer = setTimeout(() => controller?.abort(), timeout);
+
+    try {
+        const response = await fetch(url, { signal: activeSignal });
+        if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+        return await response.json();
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+async function fetchPokemonData(id, { timeout = 4000 } = {}) {
+    const cacheKey = `pokemon:${id}`;
+    if (pokemonDataCache.has(cacheKey)) {
+        return pokemonDataCache.get(cacheKey);
+    }
+
+    const promise = fetchJsonWithTimeout(`https://pokeapi.co/api/v2/pokemon/${id}`, { timeout })
+        .then(data => {
+            pokemonDataCache.set(cacheKey, data);
+            return data;
+        })
+        .catch(error => {
+            pokemonDataCache.delete(cacheKey);
+            throw error;
+        });
+
+    pokemonDataCache.set(cacheKey, promise);
+    return promise;
+}
+
+async function fetchSpeciesData(id, { timeout = 4000 } = {}) {
+    const cacheKey = `species:${id}`;
+    if (speciesDataCache.has(cacheKey)) {
+        return speciesDataCache.get(cacheKey);
+    }
+
+    const promise = fetchJsonWithTimeout(`https://pokeapi.co/api/v2/pokemon-species/${id}`, { timeout })
+        .then(data => {
+            speciesDataCache.set(cacheKey, data);
+            return data;
+        })
+        .catch(error => {
+            speciesDataCache.delete(cacheKey);
+            throw error;
+        });
+
+    speciesDataCache.set(cacheKey, promise);
+    return promise;
+}
+
+function loadSpriteImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.referrerPolicy = 'no-referrer';
+
+        const timeoutId = window.setTimeout(() => {
+            img.onload = null;
+            img.onerror = null;
+            reject(new Error(`Sprite timed out: ${url}`));
+        }, 2500);
+
+        img.onload = () => {
+            window.clearTimeout(timeoutId);
+            resolve(url);
+        };
+        img.onerror = () => {
+            window.clearTimeout(timeoutId);
+            reject(new Error(`Sprite failed: ${url}`));
+        };
+        img.src = url;
+    });
+}
+
+function createSpriteUrlCandidates(id, shiny = false) {
+    const candidates = [];
+    const addCandidate = (url) => {
+        if (url && !candidates.includes(url)) candidates.push(url);
+    };
+
+    const rawBase = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
+    const jsDelivrBase = 'https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon';
+    const shinyPrefix = shiny ? 'shiny/' : '';
+
+    if (spriteMode === SPRITE_MODES.SHOWDOWN) {
+        addCandidate(`${rawBase}/other/showdown/${shinyPrefix}${id}.gif`);
+        addCandidate(`${jsDelivrBase}/other/showdown/${shinyPrefix}${id}.gif`);
+        addCandidate(`${rawBase}/other/showdown/${shinyPrefix}${id}.png`);
+        addCandidate(`${jsDelivrBase}/other/showdown/${shinyPrefix}${id}.png`);
+    } else if (spriteMode === SPRITE_MODES.ANIMATED_2D) {
+        if (id <= 649) {
+            addCandidate(`${rawBase}/versions/generation-v/black-white/animated/${shinyPrefix}${id}.gif`);
+            addCandidate(`${jsDelivrBase}/versions/generation-v/black-white/animated/${shinyPrefix}${id}.gif`);
+        }
+        addCandidate(`${rawBase}/other/showdown/${shinyPrefix}${id}.gif`);
+        addCandidate(`${jsDelivrBase}/other/showdown/${shinyPrefix}${id}.gif`);
+        addCandidate(`${rawBase}/${shinyPrefix}${id}.png`);
+        addCandidate(`${jsDelivrBase}/${shinyPrefix}${id}.png`);
+    } else {
+        addCandidate(`${rawBase}/${shinyPrefix}${id}.png`);
+        addCandidate(`${jsDelivrBase}/${shinyPrefix}${id}.png`);
+        addCandidate(`${rawBase}/other/showdown/${shinyPrefix}${id}.gif`);
+        addCandidate(`${jsDelivrBase}/other/showdown/${shinyPrefix}${id}.gif`);
+    }
+
+    return candidates;
+}
+
+function getPokemonSpriteUrl(id, shiny = false) {
+    const cacheKey = `${spriteMode}:${id}:${shiny ? 'shiny' : 'normal'}`;
+    if (spriteUrlCache.has(cacheKey)) {
+        return spriteUrlCache.get(cacheKey);
+    }
+    const [primaryUrl] = createSpriteUrlCandidates(id, shiny);
+    return primaryUrl || '';
+}
+
+function setSpriteImage(imgEl, id, shiny = false) {
+    if (!imgEl) return;
+
+    imgEl.setAttribute('loading', 'lazy');
+    imgEl.setAttribute('decoding', 'async');
+
+    const cacheKey = `${spriteMode}:${id}:${shiny ? 'shiny' : 'normal'}`;
+    const cachedUrl = spriteUrlCache.get(cacheKey);
+    if (cachedUrl) {
+        imgEl.src = cachedUrl;
+        return;
+    }
+
+    const pending = pendingSpriteLoads.get(cacheKey) || (async () => {
+        const urls = createSpriteUrlCandidates(id, shiny);
+        for (const url of urls) {
+            try {
+                const resolvedUrl = await loadSpriteImage(url);
+                spriteUrlCache.set(cacheKey, resolvedUrl);
+                return resolvedUrl;
+            } catch (error) {
+                // Try the next candidate.
+            }
+        }
+        return null;
+    })();
+
+    pendingSpriteLoads.set(cacheKey, pending);
+    pending.then((resolvedUrl) => {
+        if (resolvedUrl && imgEl) {
+            spriteUrlCache.set(cacheKey, resolvedUrl);
+            imgEl.src = resolvedUrl;
+        } else if (imgEl) {
+            imgEl.src = createSpriteUrlCandidates(id, shiny)[0] || '';
+        }
+        pendingSpriteLoads.delete(cacheKey);
+    }).catch(() => {
+        pendingSpriteLoads.delete(cacheKey);
+    });
+}
+
+function getDexSpriteUrl(pokeData, shiny = false) {
+    if (!pokeData) return '';
+    if (spriteMode === SPRITE_MODES.SHOWDOWN) {
+        return getPokemonSpriteUrl(pokeData.id, shiny);
+    }
+
+    if (spriteMode === SPRITE_MODES.ANIMATED_2D) {
+        return getPokemonSpriteUrl(pokeData.id, shiny);
+    }
+
+    return shiny
+        ? pokeData.sprites?.front_shiny || getPokemonSpriteUrl(pokeData.id, true)
+        : pokeData.sprites?.front_default || getPokemonSpriteUrl(pokeData.id, false);
+}
+
+function setSpriteMode(mode) {
+    if (!Object.values(SPRITE_MODES).includes(mode)) {
+        mode = SPRITE_MODES.NORMAL;
+    }
+    spriteMode = mode;
+    localStorage.setItem(STORAGE_SPRITE_MODE_KEY, spriteMode);
+
+    const showdownToggle = document.getElementById('sprite-mode-showdown-toggle');
+    const animated2dToggle = document.getElementById('sprite-mode-2d-toggle');
+
+    if (showdownToggle) showdownToggle.checked = spriteMode === SPRITE_MODES.SHOWDOWN;
+    if (animated2dToggle) animated2dToggle.checked = spriteMode === SPRITE_MODES.ANIMATED_2D;
+
+    if (!document.getElementById('screen-inventory').classList.contains('hidden')) renderInventory();
+    if (!document.getElementById('screen-pokedex').classList.contains('hidden')) renderPokedexGrid();
+    if (typeof updateDexImage === 'function') updateDexImage();
+}
+
+function updateSpriteModeToggle() {
+    const showdownToggle = document.getElementById('sprite-mode-showdown-toggle');
+    const animated2dToggle = document.getElementById('sprite-mode-2d-toggle');
+
+    if (showdownToggle) showdownToggle.checked = spriteMode === SPRITE_MODES.SHOWDOWN;
+    if (animated2dToggle) animated2dToggle.checked = spriteMode === SPRITE_MODES.ANIMATED_2D;
+}
+
 const genBounds = {
     1: [1, 151], 2: [152, 251], 3: [252, 386],
     4: [387, 493], 5: [494, 649], 6: [650, 721],
@@ -89,16 +345,73 @@ const pointUpgradeCosts = { common: 5, uncommon: 25, rare: 125, epic: 625 };
 const craftRequirements = { common: 3, uncommon: 4, rare: 5, epic: 6, legendary: 8 };
 
 const mutationDefs = {
-    sakura: { name: 'Sakura', color: '#ff6b9a', icon: '🌸', filter: 'hue-rotate(320deg) saturate(1.25) brightness(1.05)' },
-    winter: { name: 'Winter', color: '#60a5fa', icon: '❄️', filter: 'hue-rotate(190deg) saturate(1.15) brightness(1.06)' },
-    molten: { name: 'Molten', color: '#ff6b3d', icon: '🔥', filter: 'sepia(0.35) saturate(1.35) brightness(1.08)' },
-    nuclear: { name: 'Nuclear', color: '#22c55e', icon: '☢️', filter: 'hue-rotate(100deg) saturate(1.4) brightness(1.12)' },
-    galaxy: { name: 'Galaxy', color: '#a855f7', icon: '🌌', filter: 'hue-rotate(270deg) saturate(1.3) brightness(0.95) contrast(1.1)' },
-    silver: { name: 'Silver', color: '#d1d5db', icon: '✨', filter: 'grayscale(100%) brightness(1.15) contrast(1.05)' },
-    shadow: { name: 'Shadow', color: '#1f2937', icon: '🌑', filter: 'brightness(0.75) contrast(1.1) saturate(0.8)' },
-    gay: { name: 'Rainbow', color: '#ff00ff', icon: '🌈', filter: 'hue-rotate(60deg) saturate(1.8) brightness(1.08)' }
+    sakura: { name: 'Sakura', color: '#ff6b9a', icon: '🌸', filter: 'hue-rotate(320deg) saturate(1.5) brightness(1.12) contrast(1.05)' },
+    winter: { name: 'Winter', color: '#60a5fa', icon: '❄️', filter: 'hue-rotate(190deg) saturate(1.45) brightness(1.14) contrast(1.08)' },
+    molten: { name: 'Molten', color: '#ff6b3d', icon: '🔥', filter: 'sepia(0.45) saturate(1.55) brightness(1.12) contrast(1.05)' },
+    nuclear: { name: 'Nuclear', color: '#22c55e', icon: '☢️', filter: 'hue-rotate(100deg) saturate(1.7) brightness(1.18) contrast(1.1)' },
+    galaxy: { name: 'Galaxy', color: '#a855f7', icon: '🌌', filter: 'hue-rotate(270deg) saturate(1.55) brightness(1.05) contrast(1.18)' },
+    silver: { name: 'Silver', color: '#d1d5db', icon: '✨', filter: 'grayscale(100%) brightness(1.25) contrast(1.2)' },
+    shadow: { name: 'Shadow', color: '#0f172a', icon: '🌑', filter: 'brightness(0.28) contrast(1.4) saturate(0.35)' },
+    gay: { name: 'Rainbow', color: '#ff00ff', icon: '🌈', filter: 'hue-rotate(60deg) saturate(2) brightness(1.12) contrast(1.08)' }
 };
 const mutationOrder = ['sakura', 'winter', 'molten', 'nuclear', 'galaxy', 'silver', 'shadow', 'gay'];
+
+const pokedexNameMap = {};
+let pokedexNamesLoaded = false;
+
+function normalizePokedexQuery(value) {
+    return value.trim().toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ');
+}
+
+function extractPokedexId(url) {
+    const parts = url.split('/').filter(Boolean);
+    return parseInt(parts[parts.length - 1], 10);
+}
+
+async function loadAllPokedexNames() {
+    if (pokedexNamesLoaded) return;
+    try {
+        const data = await fetchJsonWithTimeout('https://pokeapi.co/api/v2/pokemon?limit=10000', { timeout: 5000 });
+        data.results.forEach(entry => {
+            const id = extractPokedexId(entry.url);
+            if (id && entry.name) pokedexNameMap[id] = entry.name;
+        });
+    } catch (err) {
+        console.warn('Pokedex name lookup failed', err);
+    }
+    pokedexNamesLoaded = true;
+}
+
+function getPokedexName(id) {
+    return pokedexNameMap[id] || '';
+}
+
+function getLevenshteinDistance(a, b) {
+    const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            matrix[i][j] = Math.min(
+                matrix[i - 1][j] + 1,
+                matrix[i][j - 1] + 1,
+                matrix[i - 1][j - 1] + (a[j - 1] === b[i - 1] ? 0 : 1)
+            );
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
+function fuzzyMatchQuery(query, text) {
+    if (!query || !text) return false;
+    if (text.includes(query) || query.includes(text)) return true;
+    const distance = getLevenshteinDistance(query, text);
+    const threshold = Math.max(1, Math.floor(Math.min(query.length, text.length) * 0.25));
+    return distance <= threshold;
+}
+
+function capitalizeWords(value) {
+    return value.replace(/\b[a-z]/g, char => char.toUpperCase()).replace(/-/g, ' ');
+}
 
 const fruitTierDefs = {
     common: { name: 'Common', color: '#b2bec3', next: 'uncommon' },
@@ -151,7 +464,13 @@ function getRewardTierKey(pokemonId, fallbackTierKey) {
     if (legendaries.includes(pokemonId) && !mythicalIds.includes(pokemonId)) {
         return 'legendary';
     }
-    return fallbackTierKey;
+
+    const normalizedFallback = fallbackTierKey || 'common';
+    if (['legendary', 'mythical', 'umbra'].includes(normalizedFallback)) {
+        return 'epic';
+    }
+
+    return normalizedFallback;
 }
 
 function getRarityBorderClass(tierKey) {
@@ -563,9 +882,23 @@ function addPokemonToInventory(tierKey, pokeId, shiny = false, mutations = [], f
 }
 
 function getPokemonSpriteUrl(id, shiny = false) {
+    const cacheKey = `${spriteMode}:${id}:${shiny ? 'shiny' : 'normal'}`;
+    if (spriteUrlCache.has(cacheKey)) {
+        return spriteUrlCache.get(cacheKey);
+    }
+    const [primaryUrl] = createSpriteUrlCandidates(id, shiny);
+    return primaryUrl || '';
+}
+
+function getDexSpriteUrl(pokeData, shiny = false) {
+    if (!pokeData) return '';
+    if (spriteMode === SPRITE_MODES.SHOWDOWN || spriteMode === SPRITE_MODES.ANIMATED_2D) {
+        return getPokemonSpriteUrl(pokeData.id, shiny);
+    }
+
     return shiny
-        ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`
-        : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+        ? pokeData.sprites?.front_shiny || getPokemonSpriteUrl(pokeData.id, true)
+        : pokeData.sprites?.front_default || getPokemonSpriteUrl(pokeData.id, false);
 }
 
 function isPokemonOwned(id) { 
@@ -608,14 +941,213 @@ for(let i = 0; i < 12; i++) spawnFloatingSweet();
 setInterval(spawnFloatingSweet, 2000);
 
 // --- Screen Navigation Logic ---
-document.addEventListener("DOMContentLoaded", () => {
+
+function isSpecialName(name) {
+    return SPECIAL_NAMES.includes(name.toLowerCase());
+}
+
+function normalizeThemePreset(preset) {
+    const normalizedPreset = String(preset || '').toLowerCase();
+
+    if (Object.prototype.hasOwnProperty.call(THEME_PALETTES[THEME_GROUPS.SPECIAL], normalizedPreset)) {
+        return normalizedPreset;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(THEME_PALETTES[THEME_GROUPS.MODERN], normalizedPreset)) {
+        return normalizedPreset;
+    }
+
+    if (['cozy', 'personalized', 'special'].includes(normalizedPreset)) {
+        return DEFAULT_THEME_PRESETS.SPECIAL;
+    }
+
+    if (['modern', 'default', 'light', 'slate', 'frost', 'modern-dark'].includes(normalizedPreset)) {
+        return DEFAULT_THEME_PRESETS.MODERN;
+    }
+
+    return isSpecialName(userName || '') ? DEFAULT_THEME_PRESETS.SPECIAL : DEFAULT_THEME_PRESETS.MODERN;
+}
+
+function getThemeGroupForUser() {
+    return isSpecialName(userName || '') ? THEME_GROUPS.SPECIAL : THEME_GROUPS.MODERN;
+}
+
+function getAvailableThemePresets() {
+    return Object.entries(THEME_PALETTES[getThemeGroupForUser()]).map(([value, theme]) => ({ value, label: theme.label }));
+}
+
+function updateThemePresetSelector() {
+    const selector = document.getElementById('theme-preset-select');
+    if (!selector) return;
+
+    const availablePresets = getAvailableThemePresets();
+    const currentPreset = normalizeThemePreset(userTheme);
+    selector.innerHTML = availablePresets.map(({ value, label }) => `<option value="${value}">${label}</option>`).join('');
+    selector.value = availablePresets.some((preset) => preset.value === currentPreset) ? currentPreset : availablePresets[0]?.value || '';
+}
+
+function setThemePreset(preset, persist = true) {
+    const normalizedPreset = normalizeThemePreset(preset);
+    userTheme = normalizedPreset;
+
+    if (persist) {
+        localStorage.setItem(STORAGE_USER_THEME_KEY, userTheme);
+    }
+
+    const themeGroup = Object.prototype.hasOwnProperty.call(THEME_PALETTES[THEME_GROUPS.SPECIAL], normalizedPreset) ? THEME_GROUPS.SPECIAL : THEME_GROUPS.MODERN;
+    const palette = THEME_PALETTES[themeGroup][normalizedPreset];
+    const html = document.documentElement;
+
+    html.setAttribute('data-theme', themeGroup);
+    html.setAttribute('data-theme-preset', normalizedPreset);
+
+    const cssVariables = {
+        'bg-primary': palette.bgPrimary,
+        'bg-secondary': palette.bgSecondary,
+        'text-primary': palette.textPrimary,
+        'accent-primary': palette.accentPrimary,
+        'accent-secondary': palette.accentSecondary,
+        'shadow-light': palette.shadowLight,
+        'surface-panel': palette.surfacePanel,
+        'surface-elevated': palette.surfaceElevated,
+        'surface-card': palette.surfaceCard,
+        'surface-muted': palette.surfaceMuted,
+        'border-soft': palette.borderSoft,
+        'border-strong': palette.borderStrong,
+        'text-muted': palette.textMuted,
+        'text-inverse': palette.textInverse
+    };
+
+    Object.entries(cssVariables).forEach(([name, value]) => {
+        html.style.setProperty(`--${name}`, value);
+    });
+
+    updateThemePresetSelector();
+}
+
+function applyTheme() {
+    setThemePreset(userTheme, false);
+}
+
+function handleLoginSubmit() {
+    const nameInput = document.getElementById('login-name-input');
+    const name = nameInput.value.trim();
+    
+    if (!name) {
+        const msg = document.getElementById('login-message');
+        msg.textContent = 'Please enter a name!';
+        msg.classList.add('error');
+        return;
+    }
+    
+    if (isSpecialName(name)) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('password-screen').classList.remove('hidden');
+        document.getElementById('password-input').focus();
+    } else {
+        userName = name;
+        localStorage.setItem(STORAGE_USER_NAME_KEY, userName);
+        setThemePreset(DEFAULT_THEME_PRESETS.MODERN);
+        document.getElementById('login-screen').classList.add('hidden');
+        proceedToLoading();
+    }
+}
+
+function handlePasswordSubmit() {
+    const passwordInput = document.getElementById('password-input');
+    const password = passwordInput.value;
+    
+    if (password === SPECIAL_PASSWORD) {
+        const nameInput = document.getElementById('login-name-input');
+        userName = nameInput.value.trim();
+        localStorage.setItem(STORAGE_USER_NAME_KEY, userName);
+        setThemePreset(DEFAULT_THEME_PRESETS.SPECIAL);
+        document.getElementById('password-screen').classList.add('hidden');
+        proceedToLoading();
+    } else {
+        const msg = document.getElementById('password-message');
+        msg.textContent = 'Incorrect password.';
+        msg.classList.add('error');
+        passwordInput.value = '';
+    }
+}
+
+function proceedToLoading() {
+    const loadingTitle = document.getElementById('loading-title');
+    if (loadingTitle) {
+        loadingTitle.textContent = getThemeGroupForUser() === THEME_GROUPS.SPECIAL ? 'Happy 2 Year Anniversary!' : 'Get Ready...';
+    }
+    
     setTimeout(() => {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('main-menu').classList.remove('hidden');
         document.getElementById('btn-bag').classList.remove('hidden');
         playSound('open');
         handleVersionCheck();
+        updateSpriteModeToggle();
+
+        const settingsBtn = document.getElementById('settings-toggle-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsClose = document.getElementById('settings-close-btn');
+        const showdownToggle = document.getElementById('sprite-mode-showdown-toggle');
+        const animated2dToggle = document.getElementById('sprite-mode-2d-toggle');
+        const themePresetSelect = document.getElementById('theme-preset-select');
+
+        settingsBtn?.addEventListener('click', () => {
+            settingsPanel?.classList.toggle('hidden');
+        });
+
+        settingsClose?.addEventListener('click', () => {
+            settingsPanel?.classList.add('hidden');
+        });
+
+        showdownToggle?.addEventListener('change', (event) => {
+            setSpriteMode(event.target.checked ? SPRITE_MODES.SHOWDOWN : SPRITE_MODES.NORMAL);
+        });
+
+        animated2dToggle?.addEventListener('change', (event) => {
+            setSpriteMode(event.target.checked ? SPRITE_MODES.ANIMATED_2D : SPRITE_MODES.NORMAL);
+        });
+
+        themePresetSelect?.addEventListener('change', (event) => {
+            setThemePreset(event.target.value);
+        });
+
+        updateThemePresetSelector();
+
+        if (spriteMode === SPRITE_MODES.SHOWDOWN || spriteMode === SPRITE_MODES.ANIMATED_2D) {
+            settingsPanel?.classList.remove('hidden');
+        }
     }, 2500);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    applyTheme();
+    updateThemePresetSelector();
+    
+    if (userName) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('loading-screen').classList.remove('hidden');
+        proceedToLoading();
+    } else {
+        document.getElementById('login-screen').classList.remove('hidden');
+        const loginSubmitBtn = document.getElementById('login-submit-btn');
+        const loginNameInput = document.getElementById('login-name-input');
+        const passwordSubmitBtn = document.getElementById('password-submit-btn');
+        const passwordInput = document.getElementById('password-input');
+        
+        loginSubmitBtn?.addEventListener('click', handleLoginSubmit);
+        loginNameInput?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLoginSubmit();
+        });
+        
+        passwordSubmitBtn?.addEventListener('click', handlePasswordSubmit);
+        passwordInput?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handlePasswordSubmit();
+        });
+        
+        loginNameInput?.focus();
+    }
 });
 
 function switchScreen(hideId, showId) {
@@ -680,13 +1212,17 @@ function renderSelectionGrid() {
         box.onclick = () => toggleSelection(item.index, box);
         box.innerHTML = `
             <div class="inventory-card-sprite">
-                <img src="${getPokemonSpriteUrl(item.id, item.shiny)}" alt="poke">
+                <img loading="lazy" decoding="async" src="${getPokemonSpriteUrl(item.id, item.shiny)}" alt="poke" style="${getMutationFilterStyle(item.mutations)}">
             </div>
             <div class="inventory-card-meta">
                 <span class="badge" style="background-color:${rarityTiers[pendingSelection.tier].color}; font-size:10px; padding:3px 6px; margin:0;">${rarityTiers[pendingSelection.tier].name}</span>
+                <div class="selection-mutations">
+                    ${item.mutations && item.mutations.length ? getMutationBadgeHtml(item.mutations, true) : '<span class="mutation-none">No mutation</span>'}
+                </div>
             </div>
         `;
         grid.appendChild(box);
+        setSpriteImage(box.querySelector('img'), item.id, item.shiny);
     });
 
     updateSelectionConfirmBtn();
@@ -804,6 +1340,24 @@ let devOverrides = {
     multiRarityOverrides: []
 };
 
+function resetAllPersistentData() {
+    localStorage.clear();
+    inventory = normalizeInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [], mythical: [], umbra: [] });
+    ownedSpecies = [];
+    speciesPoints = {};
+    fruitInventory = normalizeFruitInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [] });
+    favorites = [];
+    userName = '';
+    userTheme = DEFAULT_THEME_PRESETS.MODERN;
+    spriteMode = SPRITE_MODES.NORMAL;
+    localStorage.setItem(STORAGE_VERSION_KEY, APP_VERSION);
+    localStorage.setItem(STORAGE_USER_NAME_KEY, userName);
+    localStorage.setItem(STORAGE_USER_THEME_KEY, userTheme);
+    localStorage.setItem(STORAGE_SPRITE_MODE_KEY, spriteMode);
+    saveInventory();
+    applyTheme();
+}
+
 function setupDeveloperMode() {
     const toggleBtn = document.getElementById('dev-toggle-btn');
     const welcomeStartBtn = document.getElementById('welcome-start-btn');
@@ -812,6 +1366,7 @@ function setupDeveloperMode() {
     const applyBtn = document.getElementById('dev-apply-btn');
     const clearBtn = document.getElementById('dev-clear-btn');
     const clearDataBtn = document.getElementById('dev-clear-data-btn');
+    const injectBtn = document.getElementById('dev-inject-btn');
 
     if (!toggleBtn || !panel || !applyBtn || !clearBtn) return;
 
@@ -821,19 +1376,23 @@ function setupDeveloperMode() {
     });
 
     resetStorageBtn?.addEventListener('click', () => {
-        STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
-        inventory = normalizeInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [], mythical: [], umbra: [] });
-        ownedSpecies = [];
-        speciesPoints = {};
-        fruitInventory = normalizeFruitInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [] });
-        favorites = [];
+        resetAllPersistentData();
         markVersionInstalled();
         hideVersionModals();
     });
 
     toggleBtn.addEventListener('click', () => {
+        const enteredPassword = window.prompt('Enter dev password');
+        if (enteredPassword === null) return;
+
+        if (enteredPassword !== DEV_MENU_PASSWORD) {
+            document.getElementById('dev-status').textContent = 'Access denied.';
+            return;
+        }
+
         devModeEnabled = !devModeEnabled;
         panel.classList.toggle('hidden', !devModeEnabled);
+        if (devModeEnabled) updateDevStatus();
     });
 
     applyBtn.addEventListener('click', () => {
@@ -843,7 +1402,7 @@ function setupDeveloperMode() {
         devOverrides.shiny = document.getElementById('dev-shiny-checkbox').checked;
         const pokemonInput = document.getElementById('dev-pokemon-id').value;
         devOverrides.pokemonId = pokemonInput ? parseInt(pokemonInput, 10) : null;
-        const checkedMutations = Array.from(document.querySelectorAll('input[name="dev-mutation"]:checked')).map(cb => cb.value);
+        const checkedMutations = Array.from(document.querySelectorAll('input[name="dev-mutation-override"]:checked')).map(cb => cb.value);
         devOverrides.mutations = checkedMutations;
         devOverrides.multiGenOverrides = (document.getElementById('dev-multi-gen-input').value || '')
             .split(',')
@@ -863,27 +1422,47 @@ function setupDeveloperMode() {
         document.getElementById('dev-rarity-select').value = '';
         document.getElementById('dev-shiny-checkbox').checked = false;
         document.getElementById('dev-pokemon-id').value = '';
-        document.querySelectorAll('input[name="dev-mutation"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[name="dev-mutation-override"]').forEach(cb => cb.checked = false);
         document.getElementById('dev-multi-gen-input').value = '';
         document.getElementById('dev-multi-rarity-input').value = '';
         updateDevStatus();
     });
 
+    injectBtn?.addEventListener('click', () => {
+        const pokemonIdInput = document.getElementById('dev-inject-pokemon-id');
+        const tierSelect = document.getElementById('dev-inject-tier-select');
+        const speciesIdInput = document.getElementById('dev-inject-species-id');
+        const shinyCheckbox = document.getElementById('dev-inject-shiny-checkbox');
+        const pokemonId = parseInt(pokemonIdInput?.value || '', 10);
+        const speciesId = speciesIdInput?.value ? parseInt(speciesIdInput.value, 10) : pokemonId;
+        const tierKey = tierSelect?.value || 'common';
+        const checkedMutations = Array.from(document.querySelectorAll('input[name="dev-mutation-inject"]:checked')).map(cb => cb.value);
+
+        if (!Number.isInteger(pokemonId) || pokemonId < 1 || pokemonId > MAX_POKEMON) {
+            document.getElementById('dev-status').textContent = 'Enter a valid Pokémon ID first.';
+            return;
+        }
+
+        if (!Number.isInteger(speciesId) || speciesId < 1 || speciesId > MAX_POKEMON) {
+            document.getElementById('dev-status').textContent = 'Enter a valid species ID first.';
+            return;
+        }
+
+        addPokemonToInventory(tierKey, pokemonId, shinyCheckbox?.checked || false, checkedMutations, null, speciesId, true);
+        if (!ownedSpecies.includes(speciesId)) ownedSpecies.push(speciesId);
+        saveInventory();
+        renderInventory();
+        renderPokedexGrid();
+        document.getElementById('dev-status').textContent = `✅ Added #${pokemonId} to the ${tierKey} bag${shinyCheckbox?.checked ? ' as shiny' : ''}${checkedMutations.length ? ` with ${checkedMutations.join(', ')}` : ''}.`;
+    });
+
     if (clearDataBtn) {
         clearDataBtn.addEventListener('click', () => {
-            if (confirm('\u26a0\ufe0f This will clear ALL your inventory, favorites, and fruit data. Continue?')) {
-                localStorage.removeItem('pokeInventory');
-                localStorage.removeItem('pokeSpecies');
-                localStorage.removeItem('fruitInventory');
-                localStorage.removeItem('pokeFavs');
-                inventory = normalizeInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [], mythical: [], umbra: [] });
-                ownedSpecies = [];
-                speciesPoints = {};
-                fruitInventory = normalizeFruitInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [] });
-                favorites = [];
+            if (confirm('\u26a0\ufe0f This will clear ALL saved data, including inventory, favorites, and theme settings. Continue?')) {
+                resetAllPersistentData();
                 markVersionInstalled();
                 updateDevStatus();
-                document.getElementById('dev-status').textContent = '\u2705 All data cleared! Refresh the page to see changes.';
+                document.getElementById('dev-status').textContent = '✅ All local data cleared. Reload the page to fully reset the app.';
             }
         });
     }
@@ -1090,14 +1669,14 @@ async function getRewardId(selectedRarity, selectedGen) {
     }
 
     let finalId = baseId;
-    if (Math.random() < 0.20) { 
+    if (Math.random() < 0.20) {
         try {
-            const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseId}`).then(r => r.json());
+            const speciesData = await fetchSpeciesData(baseId);
             if (speciesData.varieties && speciesData.varieties.length > 1) {
                 const chosenVariety = speciesData.varieties[Math.floor(Math.random() * speciesData.varieties.length)];
                 finalId = parseInt(chosenVariety.pokemon.url.split('/').slice(-2, -1)[0]);
             }
-        } catch(e) {}
+        } catch (e) {}
     }
     return { baseId, finalId };
 }
@@ -1112,7 +1691,7 @@ async function generatePokemonReward() {
     const tier = rarityTiers[rewardTierKey];
     const mutations = devSpin?.mutations?.length ? devSpin.mutations : getRandomMutations();
 
-    const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${rewardId}`).then(r => r.json());
+    const pokeData = await fetchPokemonData(rewardId);
     const formInfo = getFormBadgeInfo(pokeData);
 
     addPokemonToInventory(rewardTierKey, rewardId, isShinyReward, mutations, formInfo, rewardBaseId);
@@ -1120,7 +1699,7 @@ async function generatePokemonReward() {
     saveInventory();
 
     const rewardImg = document.getElementById('pokemon-img');
-    rewardImg.src = getPokemonSpriteUrl(rewardId, isShinyReward);
+    setSpriteImage(rewardImg, rewardId, isShinyReward);
     rewardImg.style.cssText = getMutationFilterStyle(mutations);
     document.getElementById('gen-badge').classList.add('hidden');
 
@@ -1284,7 +1863,7 @@ async function generateMultiRewards(state) {
     rewardArea.classList.remove('hidden');
 
     const rewardPromises = state.map(res => getRewardId(res.rarity, res.gen).then(async data => {
-        const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${data.finalId}`).then(r => r.json());
+        const pokeData = await fetchPokemonData(data.finalId);
         return { ...res, ...data, pokeData };
     }));
     const finalRewards = await Promise.all(rewardPromises);
@@ -1302,12 +1881,12 @@ async function generateMultiRewards(state) {
 
         const borderClass = getRarityBorderClass(rewardTierKey);
 
-        rewardArea.innerHTML += `
+        rewardArea.insertAdjacentHTML('beforeend', `
             <div class="mini-reward-card">
                 <div class="pokemon-reward-card ${borderClass}">
                     <div class="pokemon-reward-sprite">
                         ${isShinyReward ? '<span class="shiny-icon">✨</span>' : ''}
-                        <img src="${getPokemonSpriteUrl(res.finalId, isShinyReward)}" style="${getMutationFilterStyle(mutations)}">
+                        <img loading="lazy" decoding="async" src="${getPokemonSpriteUrl(res.finalId, isShinyReward)}" style="${getMutationFilterStyle(mutations)}">
                     </div>
                     <div class="reward-info">
                         <span class="badge ${isShinyReward ? 'shiny-badge' : ''}" style="background-color:${tier.color};">${tier.name}${isShinyReward ? ' ✨' : ''}</span>
@@ -1317,7 +1896,10 @@ async function generateMultiRewards(state) {
                     <div class="reward-types-row">${typesHTML}</div>
                 </div>
             </div>
-        `;
+        `);
+        const insertedImg = rewardArea.querySelectorAll('.pokemon-reward-sprite img');
+        const latestImg = insertedImg[insertedImg.length - 1];
+        setSpriteImage(latestImg, res.finalId, isShinyReward);
     });
     saveInventory();
     setTimeout(() => rewardArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
@@ -1445,7 +2027,7 @@ async function openSpeciesDetailModal(item, tierKey) {
     const pokedexBtn = document.getElementById('species-pokedex-btn');
 
     try {
-        const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon/${speciesId}`).then(res => res.json());
+        const speciesData = await fetchPokemonData(speciesId);
         nameEl.textContent = speciesData.name.charAt(0).toUpperCase() + speciesData.name.slice(1).replace('-', ' ');
     } catch (error) {
         nameEl.textContent = `#${speciesId}`;
@@ -1462,7 +2044,7 @@ async function openSpeciesDetailModal(item, tierKey) {
     const canUpgrade = tierKey !== 'mythical' && tierKey !== 'umbra' && upgradeTargetTier && upgradeCandidate && currentPoints >= upgradeCost;
 
     tierEl.textContent = `${tierName} • ${ownedCopyCount} owned`;
-    imgEl.src = getPokemonSpriteUrl(speciesId, item.shiny);
+    setSpriteImage(imgEl, speciesId, item.shiny);
     imgEl.style.cssText = getMutationFilterStyle(item.mutations);
 
     summaryEl.innerHTML = `
@@ -1610,7 +2192,7 @@ function renderInventory(view = activeBagView) {
                 ${item.shiny ? '<span class="shiny-icon">✨</span>' : ''}
                 ${item.count > 1 ? `<span class="inv-count-badge">x${item.count}</span>` : ''}
                 <div class="inventory-card-sprite">
-                    <img src="${getPokemonSpriteUrl(item.id, item.shiny)}" alt="poke" style="${getMutationFilterStyle(item.mutations)}">
+                    <img loading="lazy" decoding="async" src="${getPokemonSpriteUrl(item.id, item.shiny)}" alt="poke" style="${getMutationFilterStyle(item.mutations)}">
                 </div>
                 <div class="inventory-card-meta">
                     <span class="badge" style="background-color:${tier.color}; font-size:10px; padding:3px 6px; margin:0;">${tier.name}</span>
@@ -1619,6 +2201,7 @@ function renderInventory(view = activeBagView) {
                 </div>
             `;
             grid.appendChild(box);
+            setSpriteImage(box.querySelector('img'), item.id, item.shiny);
         });
 
         if(items.length === 0) grid.innerHTML = `<p style="color:#aaa; font-size:12px; grid-column: 1/-1; text-align:left;">No Pokémon yet...</p>`;
@@ -1765,17 +2348,31 @@ let currentPokemonOwned = false;
 
 document.getElementById('dex-gen-select').addEventListener('change', () => playSound('click'));
 
-function renderPokedexGrid() {
+async function renderPokedexGrid() {
     const gen = parseInt(document.getElementById('dex-gen-select').value);
+    const searchInput = document.getElementById('dex-search-input');
+    const searchQuery = normalizePokedexQuery(searchInput?.value || '');
     const grid = document.getElementById('pokedex-grid');
     grid.innerHTML = '';
-    
+
     const [start, end] = genBounds[gen];
     let ownedInGen = 0;
-    
+    const needsNameSearch = searchQuery && /[a-z]/.test(searchQuery) && !pokedexNamesLoaded;
+    if (needsNameSearch) await loadAllPokedexNames();
+
     for (let id = start; id <= end; id++) {
+        const name = getPokedexName(id);
         const owned = ownedSpecies.includes(id) || isPokemonOwned(id);
-        const isFav = favorites.includes(id); 
+        const isFav = favorites.includes(id);
+        
+        let shouldRender = true;
+        if (searchQuery) {
+            const idMatch = id.toString().includes(searchQuery);
+            const nameMatch = fuzzyMatchQuery(searchQuery, normalizePokedexQuery(name));
+            shouldRender = idMatch || nameMatch;
+        }
+        if (!shouldRender) continue;
+
         if (owned) ownedInGen++;
         
         const box = document.createElement('div');
@@ -1785,9 +2382,11 @@ function renderPokedexGrid() {
         box.innerHTML = `
             <span class="dex-id-label">#${id}</span>
             ${owned && isFav ? '<span class="dex-fav-heart">❤️</span>' : ''}
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png" alt="poke">
+            <img loading="lazy" decoding="async" src="${getPokemonSpriteUrl(id)}" alt="poke">
+            ${name ? `<div class="dex-name">${capitalizeWords(name)}</div>` : ''}
         `;
         grid.appendChild(box);
+        setSpriteImage(box.querySelector('img'), id, false);
     }
     
     document.getElementById('dex-progress').textContent = `${ownedInGen} / ${end - start + 1} Owned`;
@@ -1802,7 +2401,7 @@ async function openDexModal(baseId) {
     document.getElementById('dex-content').classList.add('hidden');
     
     try {
-        const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseId}`).then(res => res.json());
+        const speciesData = await fetchSpeciesData(baseId);
         
         const formContainer = document.getElementById('dex-forms');
         formContainer.innerHTML = '';
@@ -1840,7 +2439,7 @@ async function openDexModal(baseId) {
 }
 
 async function loadFormData(id, isOwned, speciesData) {
-    const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then(res => res.json());
+    const pokeData = await fetchPokemonData(id);
     currentPokeData = pokeData;
     currentDisplayMutations = getOwnedMutationsForPokemon(id);
     currentPokemonOwned = Boolean(isOwned);
@@ -2036,24 +2635,17 @@ function toggleMutationPreview(mutationKey) {
 
 function updateDexImage() {
     if (!currentPokeData) return;
-    const sprites = currentPokeData.sprites;
     const shinyBtn = document.getElementById('dex-shiny-btn');
     const dexImg = document.getElementById('dex-detail-img');
-    
-    let imageUrl = sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentPokeData.id}.png`;
+    const imageUrl = getDexSpriteUrl(currentPokeData, isShinyView && currentPokemonOwned);
+
     if (isShinyView && currentPokemonOwned) {
         shinyBtn.classList.add('active');
-        const animated = sprites.other?.showdown?.front_shiny;
-        const staticImg = sprites.front_shiny || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${currentPokeData.id}.png`;
-        imageUrl = animated || staticImg;
     } else {
         shinyBtn.classList.remove('active');
-        const animated = sprites.other?.showdown?.front_default;
-        const staticImg = sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentPokeData.id}.png`;
-        imageUrl = animated || staticImg;
     }
 
-    dexImg.src = imageUrl;
+    setSpriteImage(dexImg, currentPokeData.id, isShinyView && currentPokemonOwned);
 
     if (!currentPokemonOwned) {
         dexImg.classList.add('dex-silhouette');

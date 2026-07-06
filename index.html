@@ -10,6 +10,34 @@
 
     <div id="floating-background"></div>
 
+    <div id="login-screen" class="screen">
+        <div class="login-container">
+            <div class="login-content">
+                <div class="login-greeting" id="login-greeting">Welcome! ✨</div>
+                <div class="login-subtitle">Enter your name to begin</div>
+                
+                <input type="text" id="login-name-input" class="login-input" placeholder="Your name..." autocomplete="off">
+                <button id="login-submit-btn" class="login-btn">Continue</button>
+                
+                <div id="login-message" class="login-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="password-screen" class="screen hidden">
+        <div class="login-container">
+            <div class="login-content">
+                <div class="login-greeting">Special Access ✨</div>
+                <div class="login-subtitle">Enter the password</div>
+                
+                <input type="password" id="password-input" class="login-input" placeholder="Password..." autocomplete="off">
+                <button id="password-submit-btn" class="login-btn">Unlock</button>
+                
+                <div id="password-message" class="login-message"></div>
+            </div>
+        </div>
+    </div>
+
     <button class="nav-btn hidden" id="btn-back">🔙 Hub</button>
     <button class="nav-btn hidden" id="btn-bag">🎒 Bag</button>
     <div class="volume-control">
@@ -67,14 +95,14 @@
             <div class="dev-field">
                 <span>Mutations</span>
                 <div class="dev-mutations-checkboxes">
-                    <label><input type="checkbox" name="dev-mutation" value="sakura"> Sakura 🌸</label>
-                    <label><input type="checkbox" name="dev-mutation" value="winter"> Winter ❄️</label>
-                    <label><input type="checkbox" name="dev-mutation" value="molten"> Molten 🔥</label>
-                    <label><input type="checkbox" name="dev-mutation" value="nuclear"> Nuclear ☢️</label>
-                    <label><input type="checkbox" name="dev-mutation" value="galaxy"> Galaxy 🌌</label>
-                    <label><input type="checkbox" name="dev-mutation" value="silver"> Silver ✨</label>
-                    <label><input type="checkbox" name="dev-mutation" value="shadow"> Shadow 🌑</label>
-                    <label><input type="checkbox" name="dev-mutation" value="gay"> Rainbow 🌈</label>
+                    <label><input type="checkbox" name="dev-mutation-override" value="sakura"> Sakura 🌸</label>
+                    <label><input type="checkbox" name="dev-mutation-override" value="winter"> Winter ❄️</label>
+                    <label><input type="checkbox" name="dev-mutation-override" value="molten"> Molten 🔥</label>
+                    <label><input type="checkbox" name="dev-mutation-override" value="nuclear"> Nuclear ☢️</label>
+                    <label><input type="checkbox" name="dev-mutation-override" value="galaxy"> Galaxy 🌌</label>
+                    <label><input type="checkbox" name="dev-mutation-override" value="silver"> Silver ✨</label>
+                    <label><input type="checkbox" name="dev-mutation-override" value="shadow"> Shadow 🌑</label>
+                    <label><input type="checkbox" name="dev-mutation-override" value="gay"> Rainbow 🌈</label>
                 </div>
             </div>
         </div>
@@ -91,6 +119,48 @@
             </label>
         </div>
 
+        <div class="dev-section">
+            <div class="dev-section-title">Bag Injection</div>
+            <label class="dev-field">
+                <span>Pokémon ID</span>
+                <input type="number" id="dev-inject-pokemon-id" min="1" max="1025" placeholder="e.g. 151">
+            </label>
+            <label class="dev-field">
+                <span>Tier</span>
+                <select id="dev-inject-tier-select">
+                    <option value="common">Common</option>
+                    <option value="uncommon">Uncommon</option>
+                    <option value="rare">Rare</option>
+                    <option value="epic">Epic</option>
+                    <option value="legendary">Legendary</option>
+                    <option value="mythical">Mythical</option>
+                    <option value="umbra">Umbra</option>
+                </select>
+            </label>
+            <label class="dev-field">
+                <span>Species ID</span>
+                <input type="number" id="dev-inject-species-id" min="1" max="1025" placeholder="Leave empty for same as Pokémon ID">
+            </label>
+            <label class="dev-field">
+                <span>Shiny</span>
+                <input type="checkbox" id="dev-inject-shiny-checkbox">
+            </label>
+            <div class="dev-field">
+                <span>Mutations</span>
+                <div class="dev-mutations-checkboxes">
+                    <label><input type="checkbox" name="dev-mutation-inject" value="sakura"> Sakura 🌸</label>
+                    <label><input type="checkbox" name="dev-mutation-inject" value="winter"> Winter ❄️</label>
+                    <label><input type="checkbox" name="dev-mutation-inject" value="molten"> Molten 🔥</label>
+                    <label><input type="checkbox" name="dev-mutation-inject" value="nuclear"> Nuclear ☢️</label>
+                    <label><input type="checkbox" name="dev-mutation-inject" value="galaxy"> Galaxy 🌌</label>
+                    <label><input type="checkbox" name="dev-mutation-inject" value="silver"> Silver ✨</label>
+                    <label><input type="checkbox" name="dev-mutation-inject" value="shadow"> Shadow 🌑</label>
+                    <label><input type="checkbox" name="dev-mutation-inject" value="gay"> Rainbow 🌈</label>
+                </div>
+            </div>
+            <button type="button" id="dev-inject-btn" class="dev-inject-btn">Add to Bag</button>
+        </div>
+
         <div class="dev-actions">
             <button type="button" id="dev-apply-btn">Apply Overrides</button>
             <button type="button" id="dev-clear-btn">Clear Overrides</button>
@@ -99,10 +169,10 @@
         <div id="dev-status" class="dev-status">Ready.</div>
     </div>
 
-    <div id="loading-screen" class="screen">
+    <div id="loading-screen" class="screen hidden">
         <div class="loading-content">
             <div class="spinner">🌸</div>
-            <h1>Happy 2 Year Anniversary!</h1>
+            <h1 id="loading-title">Happy 2 Year Anniversary!</h1>
             <p>Loading your surprises... ✨</p>
         </div>
     </div>
@@ -302,17 +372,20 @@
             <h2>📖 Pokédex 📖</h2>
             
             <div class="dex-controls">
-                <select id="dex-gen-select" onchange="renderPokedexGrid()">
-                    <option value="1">Generation 1</option>
-                    <option value="2">Generation 2</option>
-                    <option value="3">Generation 3</option>
-                    <option value="4">Generation 4</option>
-                    <option value="5">Generation 5</option>
-                    <option value="6">Generation 6</option>
-                    <option value="7">Generation 7</option>
-                    <option value="8">Generation 8</option>
-                    <option value="9">Generation 9</option>
-                </select>
+                <div class="dex-filter-group">
+                    <select id="dex-gen-select" onchange="renderPokedexGrid()">
+                        <option value="1">Generation 1</option>
+                        <option value="2">Generation 2</option>
+                        <option value="3">Generation 3</option>
+                        <option value="4">Generation 4</option>
+                        <option value="5">Generation 5</option>
+                        <option value="6">Generation 6</option>
+                        <option value="7">Generation 7</option>
+                        <option value="8">Generation 8</option>
+                        <option value="9">Generation 9</option>
+                    </select>
+                    <input id="dex-search-input" type="search" placeholder="Search number or name" aria-label="Search Pokédex">
+                </div>
                 <div id="dex-progress" class="dex-progress">0 / 151 Owned</div>
             </div>
 
@@ -376,6 +449,35 @@
             
             <button id="select-confirm-btn" disabled style="margin-top: 20px;">Confirm Selection</button>
         </div>
+    </div>
+
+    <button id="settings-toggle-btn" class="settings-button" type="button" aria-label="Open settings">⚙️</button>
+    <div id="settings-panel" class="settings-panel hidden">
+        <div class="settings-header">
+            <span>Settings</span>
+            <button id="settings-close-btn" class="close-btn" type="button">✖</button>
+        </div>
+        <label class="settings-switch">
+            <span>2D Animated Sprites</span>
+            <div class="switch-row">
+                <span>Animated Generation V sprite mode</span>
+                <input type="checkbox" id="sprite-mode-2d-toggle">
+                <span class="slider"></span>
+            </div>
+        </label>
+        <label class="settings-switch">
+            <span>Showdown Sprites</span>
+            <div class="switch-row">
+                <span>Animated Showdown sprite mode</span>
+                <input type="checkbox" id="sprite-mode-showdown-toggle">
+                <span class="slider"></span>
+            </div>
+        </label>
+        <div class="theme-select-group">
+            <label for="theme-preset-select">Theme preset</label>
+            <select id="theme-preset-select" aria-label="Theme preset"></select>
+        </div>
+        <p class="settings-note">2D Animated mode uses Generation V animated sprites when available, and falls back to Showdown animated sprites for later Pokémon.</p>
     </div>
 
     <script src="script.js"></script>
