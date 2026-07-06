@@ -15,12 +15,26 @@ sfx.bgm.loop = true;
 
 let bgmStarted = false;
 const bgmSlider = document.getElementById('bgm-volume-slider');
+const bgmVolInput = document.getElementById('bgm-volume-input');
 if (bgmSlider) {
     sfx.bgm.volume = parseFloat(bgmSlider.value) || 0.2;
+    if (bgmVolInput) bgmVolInput.value = bgmSlider.value;
+    
     bgmSlider.addEventListener('input', (event) => {
         const value = parseFloat(event.target.value);
         sfx.bgm.volume = value;
+        if (bgmVolInput) bgmVolInput.value = value;
     });
+    
+    if (bgmVolInput) {
+        bgmVolInput.addEventListener('input', (event) => {
+            let value = parseFloat(event.target.value);
+            value = Math.max(0, Math.min(1, value));
+            sfx.bgm.volume = value;
+            bgmSlider.value = value;
+            bgmVolInput.value = value;
+        });
+    }
 }
 document.body.addEventListener('click', () => {
     if (!bgmStarted) {
@@ -44,25 +58,44 @@ const genBounds = {
     7: [722, 809], 8: [810, 905], 9: [906, 1025]
 };
 const legendaries = [
-    144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251,
-    377, 378, 379, 380, 381, 382, 383, 384, 385, 386,
-    480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493,
-    494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649,
-    716, 717, 718, 719, 720, 721,
-    772, 773, 785, 786, 787, 788, 789, 790, 791, 792, 793, 794, 795, 796, 797, 798, 799, 800, 801, 802, 803, 804, 805, 806, 807, 808, 809,
-    888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, 905,
-    1001, 1002, 1003, 1004, 1007, 1008, 1009, 1010, 1014, 1015, 1016, 1017, 1024, 1025
+    144, 145, 146, 150, 243, 244, 245, 249, 250,
+    377, 378, 379, 380, 381, 382, 383, 384,
+    480, 481, 482, 483, 484, 485, 486, 487, 488,
+    638, 639, 640, 641, 642, 643, 644, 645, 646,
+    716, 717, 718, 772, 773,
+    785, 786, 787, 788, 789, 790, 791, 792, 800,
+    891, 892, 894, 895, 896, 897, 898,
+    1001, 1002, 1003, 1004, 1007, 1008, 1017, 1024
 ];
+const mythicalIds = [151, 251, 385, 386, 489, 490, 491, 492, 493, 494, 647, 648, 649, 719, 720, 721, 801, 802, 807, 808, 809, 905, 1025];
 
 const rarities = [
-    { id: 'common', name: 'Common', color: '#b2bec3', chance: 0.85, pool: 'normal', next: 'rare' },
-    { id: 'rare', name: 'Rare', color: '#74b9ff', chance: 0.10, pool: 'normal', next: 'epic' },
-    { id: 'epic', name: 'Epic', color: '#a29bfe', chance: 0.04, pool: 'normal', next: 'legendary' },
-    { id: 'legendary', name: 'Legendary', color: '#ff7675', chance: 0.01, pool: 'legendary', next: null }
+    { id: 'common', name: 'Common', color: '#b2bec3', chance: 0.55, pool: 'normal', next: 'uncommon' },
+    { id: 'uncommon', name: 'Uncommon', color: '#6ddf8f', chance: 0.25, pool: 'normal', next: 'rare' },
+    { id: 'rare', name: 'Rare', color: '#74b9ff', chance: 0.12, pool: 'normal', next: 'epic' },
+    { id: 'epic', name: 'Epic', color: '#a29bfe', chance: 0.06, pool: 'normal', next: 'legendary' },
+    { id: 'legendary', name: 'Legendary', color: '#ff7675', chance: 0.017, pool: 'legendary', next: 'mythical' },
+    { id: 'mythical', name: 'Mythical', color: '#ff8a00', chance: 0.003, pool: 'mythical', next: null },
+    { id: 'umbra', name: 'Umbra', color: '#2d1b69', chance: 0, pool: 'legendary', next: null }
 ];
 
 const rarityTiers = {};
 rarities.forEach(r => rarityTiers[r.id] = r);
+const speciesPointValues = { common: 1, uncommon: 5, rare: 25, epic: 125 };
+const pointUpgradeCosts = { common: 5, uncommon: 25, rare: 125, epic: 625 };
+const craftRequirements = { common: 3, uncommon: 4, rare: 5, epic: 6, legendary: 8 };
+
+const mutationDefs = {
+    sakura: { name: 'Sakura', color: '#ff6b9a', icon: '🌸', filter: 'hue-rotate(320deg) saturate(1.25) brightness(1.05)' },
+    winter: { name: 'Winter', color: '#60a5fa', icon: '❄️', filter: 'hue-rotate(190deg) saturate(1.15) brightness(1.06)' },
+    molten: { name: 'Molten', color: '#ff6b3d', icon: '🔥', filter: 'sepia(0.35) saturate(1.35) brightness(1.08)' },
+    nuclear: { name: 'Nuclear', color: '#22c55e', icon: '☢️', filter: 'hue-rotate(100deg) saturate(1.4) brightness(1.12)' },
+    galaxy: { name: 'Galaxy', color: '#a855f7', icon: '🌌', filter: 'hue-rotate(270deg) saturate(1.3) brightness(0.95) contrast(1.1)' },
+    silver: { name: 'Silver', color: '#d1d5db', icon: '✨', filter: 'grayscale(100%) brightness(1.15) contrast(1.05)' },
+    shadow: { name: 'Shadow', color: '#1f2937', icon: '🌑', filter: 'brightness(0.75) contrast(1.1) saturate(0.8)' },
+    gay: { name: 'Rainbow', color: '#ff00ff', icon: '🌈', filter: 'hue-rotate(60deg) saturate(1.8) brightness(1.08)' }
+};
+const mutationOrder = ['sakura', 'winter', 'molten', 'nuclear', 'galaxy', 'silver', 'shadow', 'gay'];
 
 const fruitTierDefs = {
     common: { name: 'Common', color: '#b2bec3', next: 'uncommon' },
@@ -109,7 +142,10 @@ const pseudoLegendaryIds = new Set([148, 149, 248, 373, 376, 445, 635, 706, 784,
 const paradoxIds = new Set([982, 983, 984, 985, 986, 987, 988, 989, 990, 991, 992, 993, 994, 995, 996]);
 
 function getRewardTierKey(pokemonId, fallbackTierKey) {
-    if (legendaries.includes(pokemonId)) {
+    if (mythicalIds.includes(pokemonId)) {
+        return 'mythical';
+    }
+    if (legendaries.includes(pokemonId) && !mythicalIds.includes(pokemonId)) {
         return 'legendary';
     }
     return fallbackTierKey;
@@ -117,25 +153,210 @@ function getRewardTierKey(pokemonId, fallbackTierKey) {
 
 function getRarityBorderClass(tierKey) {
     switch (tierKey) {
-        case 'common': return 'rarity-border-common';
-        case 'rare': return 'rarity-border-rare';
-        case 'epic': return 'rarity-border-epic';
-        case 'legendary': return 'rarity-border-legendary';
-        default: return 'rarity-border-common';
+        case 'common': return 'rarity-card-common';
+        case 'uncommon': return 'rarity-card-uncommon';
+        case 'rare': return 'rarity-card-rare';
+        case 'epic': return 'rarity-card-epic';
+        case 'legendary': return 'rarity-card-legendary';
+        case 'mythical': return 'rarity-card-mythical';
+        case 'umbra': return 'rarity-card-umbra';
+        default: return 'rarity-card-common';
     }
+}
+
+function getCraftRequirementForTier(tierKey) {
+    return craftRequirements[tierKey] || 3;
+}
+
+function getPointUpgradeCost(tierKey) {
+    return pointUpgradeCosts[tierKey] || null;
+}
+
+function getUpgradeTargetTier(tierKey) {
+    switch (tierKey) {
+        case 'common': return 'uncommon';
+        case 'uncommon': return 'rare';
+        case 'rare': return 'epic';
+        case 'epic': return 'umbra';
+        default: return null;
+    }
+}
+
+function normalizeMutations(value) {
+    if (!Array.isArray(value)) return [];
+    return value.filter(key => mutationDefs[key]);
+}
+
+function arraysEqual(a, b) {
+    if (a.length !== b.length) return false;
+    return a.every((value, index) => value === b[index]);
+}
+
+function getRandomMutations() {
+    if (Math.random() >= 0.10) return [];
+    
+    const mutationDistribution = [
+        { count: 1, chance: 0.50 },
+        { count: 2, chance: 0.22 },
+        { count: 3, chance: 0.12 },
+        { count: 4, chance: 0.07 },
+        { count: 5, chance: 0.04 },
+        { count: 6, chance: 0.025 },
+        { count: 7, chance: 0.015 },
+        { count: 8, chance: 0.007 },
+        { count: 9, chance: 0.003 }
+    ];
+    
+    let rand = Math.random();
+    let mutationCount = 1;
+    for (const dist of mutationDistribution) {
+        if (rand < dist.chance) {
+            mutationCount = dist.count;
+            break;
+        }
+        rand -= dist.chance;
+    }
+    
+    const mutations = [];
+    const availableMutations = [...mutationOrder];
+    for (let i = 0; i < mutationCount && availableMutations.length > 0; i++) {
+        const idx = Math.floor(Math.random() * availableMutations.length);
+        mutations.push(availableMutations[idx]);
+        availableMutations.splice(idx, 1);
+    }
+    return mutations;
+}
+
+function parseCsvList(value) {
+    return (value || '')
+        .split(',')
+        .map(item => item.trim().toLowerCase())
+        .filter(Boolean);
+}
+
+function getMutationListFromInput(value) {
+    return parseCsvList(value).filter(key => mutationDefs[key]);
+}
+
+function getMutationBadgeHtml(mutations = [], compact = false) {
+    const normalized = normalizeMutations(mutations);
+    if (!normalized.length) return '';
+
+    const badgeClass = compact ? 'mutation-badge compact' : 'mutation-badge';
+    const badges = normalized.map(key => {
+        const def = mutationDefs[key];
+        return `<span class="${badgeClass}" style="background:${def.color};">${def.icon} ${def.name}</span>`;
+    }).join('');
+
+    return `<div class="mutation-badges">${badges}</div>`;
+}
+
+function getFormBadgeInfo(pokemonData = null) {
+    const text = [
+        pokemonData?.name || '',
+        (pokemonData?.forms || []).map(form => form.name).join(' '),
+        pokemonData?.species?.name || ''
+    ].join(' ').toLowerCase();
+
+    const formDefs = [
+        { key: 'mega', label: 'Mega', color: '#ff6b81' },
+        { key: 'gigantamax', label: 'Gigantamax', color: '#8b5cf6' },
+        { key: 'gmax', label: 'Gigantamax', color: '#8b5cf6' },
+        { key: 'alola', label: 'Alolan', color: '#f59e0b' },
+        { key: 'alolan', label: 'Alolan', color: '#f59e0b' },
+        { key: 'galar', label: 'Galarian', color: '#2563eb' },
+        { key: 'galarian', label: 'Galarian', color: '#2563eb' },
+        { key: 'hisui', label: 'Hisuian', color: '#dc2626' },
+        { key: 'hisuian', label: 'Hisuian', color: '#dc2626' },
+        { key: 'paldea', label: 'Paldean', color: '#16a34a' },
+        { key: 'paldean', label: 'Paldean', color: '#16a34a' },
+        { key: 'kanto', label: 'Kantonian', color: '#84cc16' },
+        { key: 'kantonian', label: 'Kantonian', color: '#84cc16' },
+        { key: 'primal', label: 'Primal', color: '#0f766e' },
+        { key: 'origin', label: 'Origin', color: '#7c3aed' },
+        { key: 'totem', label: 'Totem', color: '#fb923c' },
+        { key: 'partner', label: 'Partner', color: '#ec4899' },
+        { key: 'armor', label: 'Armor', color: '#64748b' }
+    ];
+
+    return formDefs.find(def => text.includes(def.key)) || null;
+}
+
+function getFormBadgeHtml(formInfo) {
+    if (!formInfo) return '';
+    return `<span class="form-badge" style="background:${formInfo.color};">${formInfo.label}</span>`;
+}
+
+function getMutationFilterStyle(mutations = []) {
+    const normalized = normalizeMutations(mutations);
+    if (!normalized.length) return '';
+
+    const hasRainbow = normalized.includes('gay');
+    const filters = normalized.map(key => {
+        // Skip rainbow's filter in the static chain since it's animated
+        if (key === 'gay' && hasRainbow) return null;
+        return mutationDefs[key].filter;
+    }).filter(Boolean).join(' ');
+    
+    let style = '';
+    if (filters) style += `filter: ${filters}; -webkit-filter: ${filters};`;
+    if (hasRainbow) style += ` animation: rainbowShift 4s linear infinite;`;
+    return style;
+}
+
+function getOwnedMutationsForPokemon(id) {
+    const combined = [];
+    Object.values(inventory).forEach(tierArray => {
+        tierArray.forEach(item => {
+            if (item.id === id) {
+                normalizeMutations(item.mutations).forEach(mutation => {
+                    if (!combined.includes(mutation)) combined.push(mutation);
+                });
+            }
+        });
+    });
+    return combined;
+}
+
+function getOwnedMutationsGlobally() {
+    const combined = [];
+    Object.values(inventory).forEach(tierArray => {
+        tierArray.forEach(item => {
+            normalizeMutations(item.mutations).forEach(mutation => {
+                if (!combined.includes(mutation)) combined.push(mutation);
+            });
+        });
+    });
+    return combined;
+}
+
+function getVariantOwnershipForPokemon(id) {
+    return {
+        base: Object.values(inventory).some(tierArray => tierArray.some(item => item.id === id)),
+        shiny: Object.values(inventory).some(tierArray => tierArray.some(item => item.id === id && item.shiny)),
+        sakura: Object.values(inventory).some(tierArray => tierArray.some(item => item.id === id && normalizeMutations(item.mutations).includes('sakura'))),
+        winter: Object.values(inventory).some(tierArray => tierArray.some(item => item.id === id && normalizeMutations(item.mutations).includes('winter'))),
+        molten: Object.values(inventory).some(tierArray => tierArray.some(item => item.id === id && normalizeMutations(item.mutations).includes('molten')))
+    };
 }
 
 // --- Storage Systems ---
 function normalizeInventory(rawInventory) {
-    const baseInventory = { common: [], rare: [], epic: [], legendary: [] };
+    const baseInventory = { common: [], uncommon: [], rare: [], epic: [], legendary: [], mythical: [], umbra: [] };
     const source = rawInventory || {};
 
     Object.entries(baseInventory).forEach(([tierKey]) => {
         const entries = source[tierKey] || [];
         baseInventory[tierKey] = Array.isArray(entries)
             ? entries.map(item => {
-                if (typeof item === 'number') return { id: item, shiny: false };
-                return { id: item?.id, shiny: Boolean(item?.shiny) };
+                if (typeof item === 'number') return { id: item, shiny: false, mutations: [], count: 1, speciesId: item };
+                return {
+                    id: item?.id,
+                    shiny: Boolean(item?.shiny),
+                    mutations: normalizeMutations(item?.mutations),
+                    count: Number.isInteger(item?.count) ? item.count : 1,
+                    speciesId: item?.speciesId || item?.id
+                };
             })
             : [];
     });
@@ -143,14 +364,27 @@ function normalizeInventory(rawInventory) {
     return baseInventory;
 }
 
-let inventory = normalizeInventory(JSON.parse(localStorage.getItem('pokeInventory')) || { common: [], rare: [], epic: [], legendary: [] });
+let inventory = normalizeInventory(JSON.parse(localStorage.getItem('pokeInventory')) || { common: [], uncommon: [], rare: [], epic: [], legendary: [], mythical: [], umbra: [] });
 let favorites = JSON.parse(localStorage.getItem('pokeFavs')) || [];
 let ownedSpecies = JSON.parse(localStorage.getItem('pokeSpecies')) || []; 
+let speciesPoints = normalizeSpeciesPoints(JSON.parse(localStorage.getItem('pokeSpeciesPoints')) || {});
 let fruitInventory = normalizeFruitInventory(JSON.parse(localStorage.getItem('fruitInventory')) || { common: [], uncommon: [], rare: [], epic: [], legendary: [] });
+
+function normalizeSpeciesPoints(rawPoints) {
+    if (!rawPoints || typeof rawPoints !== 'object') return {};
+    const normalized = {};
+    Object.entries(rawPoints).forEach(([speciesId, value]) => {
+        const parsedId = parseInt(speciesId, 10);
+        const numeric = Number(value) || 0;
+        if (Number.isInteger(parsedId) && parsedId > 0 && numeric > 0) normalized[parsedId] = numeric;
+    });
+    return normalized;
+}
 
 function saveInventory() { 
     localStorage.setItem('pokeInventory', JSON.stringify(inventory)); 
     localStorage.setItem('pokeSpecies', JSON.stringify(ownedSpecies));
+    localStorage.setItem('pokeSpeciesPoints', JSON.stringify(speciesPoints));
     localStorage.setItem('fruitInventory', JSON.stringify(fruitInventory));
 }
 
@@ -273,12 +507,18 @@ function getInventoryItems(tierKey) {
     return inventory[tierKey] || [];
 }
 
-function addPokemonToInventory(tierKey, pokeId, shiny = false) {
-    const existing = inventory[tierKey].find(item => item.id === pokeId && item.shiny === shiny);
+function addPokemonToInventory(tierKey, pokeId, shiny = false, mutations = [], formInfo = null, speciesId = pokeId, awardSpeciesPoints = true) {
+    const normalizedMutations = normalizeMutations(mutations);
+    const existing = inventory[tierKey].find(item => item.id === pokeId && item.shiny === shiny && arraysEqual(normalizeMutations(item.mutations), normalizedMutations) && (item.speciesId || item.id) === speciesId);
     if (existing) {
         existing.count = (existing.count || 1) + 1;
+        if (formInfo && !existing.form) existing.form = formInfo;
     } else {
-        inventory[tierKey].push({ id: pokeId, shiny, count: 1 });
+        inventory[tierKey].push({ id: pokeId, shiny, mutations: normalizedMutations, count: 1, form: formInfo || null, speciesId: speciesId || pokeId });
+    }
+
+    if (awardSpeciesPoints && speciesPointValues[tierKey] && speciesId) {
+        speciesPoints[speciesId] = (speciesPoints[speciesId] || 0) + speciesPointValues[tierKey];
     }
 }
 
@@ -383,48 +623,65 @@ document.getElementById('bag-tab-pokemon').addEventListener('click', () => rende
 document.getElementById('bag-tab-fruit').addEventListener('click', () => renderInventory('fruit'));
 
 // --- Selection Modal System (For Crafting & Sacrificing) ---
-let pendingSelection = { type: '', tier: '', required: 0, callback: null, selectedIndices: [] };
+let pendingSelection = { type: '', tier: '', required: 0, callback: null, selectedIndices: [], availableItems: [] };
+
+function renderSelectionGrid() {
+    const grid = document.getElementById('select-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    (pendingSelection.availableItems || []).forEach(item => {
+        const isSelected = pendingSelection.selectedIndices.includes(item.index);
+        const box = document.createElement('div');
+        box.classList.add('inv-item', 'selectable-item', getRarityBorderClass(pendingSelection.tier));
+        box.classList.toggle('selected', isSelected);
+        box.style.cursor = 'pointer';
+        box.onclick = () => toggleSelection(item.index, box);
+        box.innerHTML = `
+            <div class="inventory-card-sprite">
+                <img src="${getPokemonSpriteUrl(item.id, item.shiny)}" alt="poke">
+            </div>
+            <div class="inventory-card-meta">
+                <span class="badge" style="background-color:${rarityTiers[pendingSelection.tier].color}; font-size:10px; padding:3px 6px; margin:0;">${rarityTiers[pendingSelection.tier].name}</span>
+            </div>
+        `;
+        grid.appendChild(box);
+    });
+
+    updateSelectionConfirmBtn();
+}
 
 function openSelectionModal(type, tier, requiredCount, callback) {
     playSound('open');
     const tierItems = getInventoryItems(tier);
-    const availableItems = tierItems.map((item, index) => ({ ...item, index })).filter(item => !favorites.includes(item.id));
-    
+    const availableItems = tierItems
+        .map((item, index) => ({ ...item, index }))
+        .filter(item => !favorites.includes(item.id));
+
     if (availableItems.length < requiredCount) {
         alert(`You need ${requiredCount} unfavorited ${rarityTiers[tier].name} Pokémon to do this! Unfavorite some first. ❌`);
         return;
     }
 
-    pendingSelection = { type, tier, required: requiredCount, callback, selectedIndices: [] };
-    
+    pendingSelection = { type, tier, required: requiredCount, callback, selectedIndices: [], availableItems };
+
     document.getElementById('select-modal-title').textContent = type === 'craft' ? 'Crafting Menu' : 'Sacrifice Menu';
     document.getElementById('select-modal-subtitle').textContent = `Pick ${requiredCount} ${rarityTiers[tier].name} Pokémon`;
-    
-    const grid = document.getElementById('select-grid');
-    grid.innerHTML = '';
-    
-    tierItems.forEach((item, index) => {
-        const isFav = favorites.includes(item.id);
-        const box = document.createElement('div');
-        box.classList.add('inv-item');
-        box.style.borderColor = rarityTiers[tier].color;
-        
-        if (isFav) {
-            box.classList.add('locked-item');
-            box.innerHTML = `<span class="fav-lock">❤️</span><img src="${getPokemonSpriteUrl(item.id, item.shiny)}">`;
-        } else {
-            box.classList.add('selectable-item');
-            box.onclick = () => toggleSelection(index, box);
-            box.innerHTML = `${item.shiny ? '<span class="shiny-icon">✨</span>' : ''}<img src="${getPokemonSpriteUrl(item.id, item.shiny)}">`;
-        }
-        grid.appendChild(box);
-    });
-    
-    updateSelectionConfirmBtn();
-    
+
+    renderSelectionGrid();
+
     const confirmBtn = document.getElementById('select-confirm-btn');
     confirmBtn.onclick = () => confirmSelection();
-    
+
+    const randomBtn = document.getElementById('select-random-btn');
+    randomBtn.onclick = () => selectRandomItems();
+
+    const clearBtn = document.getElementById('select-clear-btn');
+    clearBtn.onclick = () => {
+        pendingSelection.selectedIndices = [];
+        renderSelectionGrid();
+    };
+
     document.getElementById('select-modal').classList.remove('hidden');
 }
 
@@ -433,24 +690,26 @@ function toggleSelection(index, boxEl) {
     const pos = pendingSelection.selectedIndices.indexOf(index);
     if (pos > -1) {
         pendingSelection.selectedIndices.splice(pos, 1);
-        boxEl.classList.remove('selected');
-    } else {
-        if (pendingSelection.selectedIndices.length < pendingSelection.required) {
-            pendingSelection.selectedIndices.push(index);
-            boxEl.classList.add('selected');
-        }
+    } else if (pendingSelection.selectedIndices.length < pendingSelection.required) {
+        pendingSelection.selectedIndices.push(index);
     }
-    updateSelectionConfirmBtn();
+    renderSelectionGrid();
+}
+
+function selectRandomItems() {
+    const shuffled = [...pendingSelection.availableItems].sort(() => Math.random() - 0.5);
+    pendingSelection.selectedIndices = shuffled.slice(0, pendingSelection.required).map(item => item.index);
+    renderSelectionGrid();
 }
 
 function updateSelectionConfirmBtn() {
     const btn = document.getElementById('select-confirm-btn');
     if (pendingSelection.selectedIndices.length === pendingSelection.required) {
         btn.disabled = false;
-        btn.textContent = "Confirm Selection";
+        btn.textContent = `Confirm Selection (${pendingSelection.selectedIndices.length})`;
     } else {
         btn.disabled = true;
-        btn.textContent = `Selected ${pendingSelection.selectedIndices.length} / ${pendingSelection.required}`;
+        btn.textContent = `Confirm Selection (${pendingSelection.selectedIndices.length}/${pendingSelection.required})`;
     }
 }
 
@@ -460,11 +719,13 @@ function confirmSelection() {
     if (pendingSelection.callback) {
         pendingSelection.callback([...pendingSelection.selectedIndices]);
     }
+    pendingSelection = { type: '', tier: '', required: 0, callback: null, selectedIndices: [], availableItems: [] };
 }
 
 function closeSelectModal() {
     playSound('click');
     document.getElementById('select-modal').classList.add('hidden');
+    pendingSelection = { type: '', tier: '', required: 0, callback: null, selectedIndices: [], availableItems: [] };
 }
 
 
@@ -478,10 +739,12 @@ const genSegments = [
 ];
 
 const raritySegments = [
-    { label: 'Common', color: '#b2bec3', id: 'common' }, { label: 'Rare', color: '#74b9ff', id: 'rare' },
-    { label: 'Common', color: '#b2bec3', id: 'common' }, { label: 'Epic', color: '#a29bfe', id: 'epic' },
-    { label: 'Common', color: '#b2bec3', id: 'common' }, { label: 'Rare', color: '#74b9ff', id: 'rare' },
-    { label: 'Common', color: '#b2bec3', id: 'common' }, { label: 'Legendary', color: '#ff7675', id: 'legendary' }
+    { label: 'Common', color: '#b2bec3', id: 'common' },
+    { label: 'Uncommon', color: '#6ddf8f', id: 'uncommon' },
+    { label: 'Rare', color: '#74b9ff', id: 'rare' },
+    { label: 'Epic', color: '#a29bfe', id: 'epic' },
+    { label: 'Legendary', color: '#ff7675', id: 'legendary' },
+    { label: 'Mythical', color: '#ff8a00', id: 'mythical' }
 ];
 
 let currentPhase = 'gen';
@@ -494,7 +757,10 @@ let devOverrides = {
     gen: null,
     rarity: null,
     shiny: false,
-    pokemonId: null
+    pokemonId: null,
+    mutations: [],
+    multiGenOverrides: [],
+    multiRarityOverrides: []
 };
 
 function setupDeveloperMode() {
@@ -502,6 +768,7 @@ function setupDeveloperMode() {
     const panel = document.getElementById('dev-panel');
     const applyBtn = document.getElementById('dev-apply-btn');
     const clearBtn = document.getElementById('dev-clear-btn');
+    const clearDataBtn = document.getElementById('dev-clear-data-btn');
 
     if (!toggleBtn || !panel || !applyBtn || !clearBtn) return;
 
@@ -517,18 +784,49 @@ function setupDeveloperMode() {
         devOverrides.shiny = document.getElementById('dev-shiny-checkbox').checked;
         const pokemonInput = document.getElementById('dev-pokemon-id').value;
         devOverrides.pokemonId = pokemonInput ? parseInt(pokemonInput, 10) : null;
+        const checkedMutations = Array.from(document.querySelectorAll('input[name="dev-mutation"]:checked')).map(cb => cb.value);
+        devOverrides.mutations = checkedMutations;
+        devOverrides.multiGenOverrides = (document.getElementById('dev-multi-gen-input').value || '')
+            .split(',')
+            .map(value => value.trim())
+            .filter(Boolean)
+            .map(value => parseInt(value.replace(/^gen/i, ''), 10))
+            .filter(value => Number.isInteger(value) && value >= 1 && value <= 9);
+        devOverrides.multiRarityOverrides = parseCsvList(document.getElementById('dev-multi-rarity-input').value)
+            .filter(value => rarityTiers[value]);
         updateDevStatus();
     });
 
     clearBtn.addEventListener('click', () => {
-        devOverrides = { enabled: false, gen: null, rarity: null, shiny: false, pokemonId: null };
+        devOverrides = { enabled: false, gen: null, rarity: null, shiny: false, pokemonId: null, mutations: [], multiGenOverrides: [], multiRarityOverrides: [] };
         document.getElementById('dev-enable-override').checked = false;
         document.getElementById('dev-gen-select').value = '';
         document.getElementById('dev-rarity-select').value = '';
         document.getElementById('dev-shiny-checkbox').checked = false;
         document.getElementById('dev-pokemon-id').value = '';
+        document.querySelectorAll('input[name="dev-mutation"]').forEach(cb => cb.checked = false);
+        document.getElementById('dev-multi-gen-input').value = '';
+        document.getElementById('dev-multi-rarity-input').value = '';
         updateDevStatus();
     });
+
+    if (clearDataBtn) {
+        clearDataBtn.addEventListener('click', () => {
+            if (confirm('\u26a0\ufe0f This will clear ALL your inventory, favorites, and fruit data. Continue?')) {
+                localStorage.removeItem('pokeInventory');
+                localStorage.removeItem('pokeSpecies');
+                localStorage.removeItem('fruitInventory');
+                localStorage.removeItem('pokeFavs');
+                inventory = normalizeInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [], mythical: [], umbra: [] });
+                ownedSpecies = [];
+                speciesPoints = {};
+                fruitInventory = normalizeFruitInventory({ common: [], uncommon: [], rare: [], epic: [], legendary: [] });
+                favorites = [];
+                updateDevStatus();
+                document.getElementById('dev-status').textContent = '\u2705 All data cleared! Refresh the page to see changes.';
+            }
+        });
+    }
 }
 
 function updateDevStatus() {
@@ -550,6 +848,9 @@ function updateDevStatus() {
     if (devOverrides.rarity) parts.push(devOverrides.rarity.charAt(0).toUpperCase() + devOverrides.rarity.slice(1));
     if (devOverrides.shiny) parts.push('Shiny');
     if (devOverrides.pokemonId) parts.push(`Pokémon #${devOverrides.pokemonId}`);
+    if (devOverrides.mutations.length > 0) parts.push(`Mutations: ${devOverrides.mutations.join(', ')}`);
+    if (devOverrides.multiGenOverrides.length > 0) parts.push(`Multi Gen: ${devOverrides.multiGenOverrides.join(', ')}`);
+    if (devOverrides.multiRarityOverrides.length > 0) parts.push(`Multi Rarity: ${devOverrides.multiRarityOverrides.join(', ')}`);
     status.textContent = parts.length > 0 ? `Next spin: ${parts.join(' • ')}` : 'Next spin: random';
 }
 
@@ -618,13 +919,21 @@ function resetGame() {
 }
 
 function getRandomRarity() {
+    const weightedRarities = [
+        { id: 'common', chance: 0.55 },
+        { id: 'uncommon', chance: 0.25 },
+        { id: 'rare', chance: 0.12 },
+        { id: 'epic', chance: 0.06 },
+        { id: 'legendary', chance: 0.017 },
+        { id: 'mythical', chance: 0.003 }
+    ];
     let rand = Math.random();
     let cumulative = 0;
-    for (let r of rarities) {
+    for (let r of weightedRarities) {
         cumulative += r.chance;
-        if (rand <= cumulative) return r;
+        if (rand <= cumulative) return rarityTiers[r.id];
     }
-    return rarities[0];
+    return rarityTiers.common;
 }
 
 function spinWheel() {
@@ -708,10 +1017,13 @@ function getRandomNormal(start, end, excludeList) {
 async function getRewardId(selectedRarity, selectedGen) {
     const tier = rarityTiers[selectedRarity];
     const [start, end] = genBounds[selectedGen];
-    const genLegendaries = legendaries.filter(id => id >= start && id <= end);
+    const genLegendaries = legendaries.filter(id => id >= start && id <= end && !mythicalIds.includes(id));
+    const genMythicals = mythicalIds.filter(id => id >= start && id <= end);
     let baseId;
     
-    if (tier.pool === 'legendary') {
+    if (tier.pool === 'mythical') {
+        baseId = genMythicals.length > 0 ? genMythicals[Math.floor(Math.random() * genMythicals.length)] : getRandomNormal(start, end, []);
+    } else if (tier.pool === 'legendary') {
         baseId = genLegendaries.length > 0 ? genLegendaries[Math.floor(Math.random() * genLegendaries.length)] : getRandomNormal(start, end, genLegendaries);
     } else {
         baseId = getRandomNormal(start, end, genLegendaries);
@@ -721,10 +1033,9 @@ async function getRewardId(selectedRarity, selectedGen) {
     if (Math.random() < 0.20) { 
         try {
             const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseId}`).then(r => r.json());
-            const alts = speciesData.varieties.filter(v => !v.is_default);
-            if (alts.length > 0) {
-                const chosen = alts[Math.floor(Math.random() * alts.length)];
-                finalId = parseInt(chosen.pokemon.url.split('/').slice(-2, -1)[0]);
+            if (speciesData.varieties && speciesData.varieties.length > 1) {
+                const chosenVariety = speciesData.varieties[Math.floor(Math.random() * speciesData.varieties.length)];
+                finalId = parseInt(chosenVariety.pokemon.url.split('/').slice(-2, -1)[0]);
             }
         } catch(e) {}
     }
@@ -739,47 +1050,71 @@ async function generatePokemonReward() {
     const rewardBaseId = devSpin?.pokemonId || baseId;
     const rewardTierKey = getRewardTierKey(rewardId, selectedRarity);
     const tier = rarityTiers[rewardTierKey];
+    const mutations = devSpin?.mutations?.length ? devSpin.mutations : getRandomMutations();
 
-    addPokemonToInventory(rewardTierKey, rewardId, isShinyReward);
+    const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${rewardId}`).then(r => r.json());
+    const formInfo = getFormBadgeInfo(pokeData);
+
+    addPokemonToInventory(rewardTierKey, rewardId, isShinyReward, mutations, formInfo, rewardBaseId);
     if (!ownedSpecies.includes(rewardBaseId)) ownedSpecies.push(rewardBaseId); 
     saveInventory();
 
-    const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${rewardId}`).then(r => r.json());
-
-    document.getElementById('pokemon-img').src = getPokemonSpriteUrl(rewardId, isShinyReward);
-    document.getElementById('cap-top').style.backgroundColor = tier.color;
+    const rewardImg = document.getElementById('pokemon-img');
+    rewardImg.src = getPokemonSpriteUrl(rewardId, isShinyReward);
+    rewardImg.style.cssText = getMutationFilterStyle(mutations);
     document.getElementById('gen-badge').classList.add('hidden');
 
     const rewardArea = document.getElementById('reward-area');
-    const capsule = rewardArea.querySelector('.capsule');
+    const card = rewardArea.querySelector('.pokemon-reward-card');
+    const rarityBadge = document.getElementById('rarity-badge');
+    const typeBadges = document.getElementById('reward-types');
+    const cardGlow = document.getElementById('reward-card-glow');
+    const mutationContainer = document.getElementById('reward-mutation-badges');
+    const formBadgeContainer = document.getElementById('reward-form-badges');
     const borderClass = getRarityBorderClass(rewardTierKey);
-    [rewardArea, capsule].forEach(el => {
-        el.classList.remove('rarity-border-common', 'rarity-border-rare', 'rarity-border-epic', 'rarity-border-legendary');
+
+    [rewardArea, card, cardGlow].forEach(el => {
+        el.classList.remove('rarity-card-common', 'rarity-card-uncommon', 'rarity-card-rare', 'rarity-card-epic', 'rarity-card-legendary', 'rarity-card-mythical', 'rarity-card-umbra');
         el.classList.add(borderClass);
     });
-    
-    const rarityBadge = document.getElementById('rarity-badge');
+
     rarityBadge.textContent = `${tier.name}${isShinyReward ? ' ✨' : ''}`;
     rarityBadge.style.backgroundColor = tier.color;
     rarityBadge.classList.toggle('shiny-badge', isShinyReward);
+    if (formBadgeContainer) {
+        formBadgeContainer.innerHTML = getFormBadgeHtml(formInfo);
+    } else if (formInfo) {
+        const container = document.createElement('div');
+        container.id = 'reward-form-badges';
+        container.className = 'form-badges';
+        container.innerHTML = getFormBadgeHtml(formInfo);
+        rewardArea.querySelector('.reward-info').appendChild(container);
+    } else if (formBadgeContainer) {
+        formBadgeContainer.innerHTML = '';
+    }
 
-    const typesContainer = document.getElementById('reward-types');
-    typesContainer.innerHTML = '';
+    if (mutationContainer) {
+        mutationContainer.innerHTML = getMutationBadgeHtml(mutations);
+    } else {
+        const container = document.createElement('div');
+        container.id = 'reward-mutation-badges';
+        container.className = 'mutation-badges';
+        container.innerHTML = getMutationBadgeHtml(mutations);
+        rewardArea.querySelector('.reward-info').appendChild(container);
+    }
+
+    typeBadges.innerHTML = '';
     pokeData.types.forEach(t => {
         const span = document.createElement('span');
         span.className = 'badge';
         span.style.backgroundColor = getTypeColor(t.type.name);
         span.textContent = t.type.name.toUpperCase();
-        typesContainer.appendChild(span);
+        typeBadges.appendChild(span);
     });
 
     rewardArea.classList.remove('hidden');
     setTimeout(() => rewardArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
-
-    if (devSpin?.enabled) {
-        devOverrides.enabled = false;
-        updateDevStatus();
-    }
+    updateDevStatus();
 }
 
 
@@ -787,7 +1122,7 @@ async function generatePokemonReward() {
 function attemptMultiSpin(count, costTier) {
     playSound('click');
     openSelectionModal('spin', costTier, 1, (selectedIndices) => {
-        playSound('craft');
+        playSound('click');
         
         selectedIndices.sort((a,b) => b - a).forEach(idx => {
             inventory[costTier].splice(idx, 1);
@@ -826,14 +1161,30 @@ function executeMultiSpin(count, state, phase) {
         let winningIndex, winner;
 
         if (phase === 'gen') {
-            winningIndex = Math.floor(Math.random() * segments.length);
+            const devSpin = getDevOverrideForSpin();
+            const overrideGen = devSpin?.multiGenOverrides?.[i];
+            if (overrideGen) {
+                winningIndex = segments.findIndex(seg => seg.id === overrideGen);
+                if (winningIndex === -1) winningIndex = Math.floor(Math.random() * segments.length);
+            } else {
+                winningIndex = Math.floor(Math.random() * segments.length);
+            }
             winner = segments[winningIndex];
             state[i].gen = winner.id;
         } else {
-            const chosenTier = getRandomRarity();
-            const matchingIndices = segments.map((s, idx) => s.id === chosenTier.id ? idx : -1).filter(idx => idx !== -1);
-            winningIndex = matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
-            winner = segments[winningIndex];
+            const devSpin = getDevOverrideForSpin();
+            const overrideRarity = devSpin?.multiRarityOverrides?.[i];
+            const chosenTier = overrideRarity ? rarityTiers[overrideRarity] : getRandomRarity();
+            if (!chosenTier) {
+                const fallbackTier = getRandomRarity();
+                const matchingIndices = segments.map((s, idx) => s.id === fallbackTier.id ? idx : -1).filter(idx => idx !== -1);
+                winningIndex = matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
+                winner = segments[winningIndex];
+            } else {
+                const matchingIndices = segments.map((s, idx) => s.id === chosenTier.id ? idx : -1).filter(idx => idx !== -1);
+                winningIndex = matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
+                winner = segments[winningIndex];
+            }
             state[i].rarity = winner.id;
         }
 
@@ -882,7 +1233,9 @@ async function generateMultiRewards(state) {
         const rewardTierKey = getRewardTierKey(res.finalId, res.rarity);
         const tier = rarityTiers[rewardTierKey];
         const isShinyReward = Math.random() < 0.01;
-        addPokemonToInventory(rewardTierKey, res.finalId, isShinyReward);
+        const mutations = getRandomMutations();
+        const formInfo = getFormBadgeInfo(res.pokeData);
+        addPokemonToInventory(rewardTierKey, res.finalId, isShinyReward, mutations, formInfo, res.baseId);
         if (!ownedSpecies.includes(res.baseId)) ownedSpecies.push(res.baseId);
 
         let typesHTML = res.pokeData.types.map(t => `<span class="badge" style="background-color:${getTypeColor(t.type.name)}">${t.type.name.toUpperCase()}</span>`).join('');
@@ -890,15 +1243,19 @@ async function generateMultiRewards(state) {
         const borderClass = getRarityBorderClass(rewardTierKey);
 
         rewardArea.innerHTML += `
-            <div class="mini-reward-card ${borderClass}">
-                <div class="mini-capsule ${borderClass}">
-                    <div class="mini-cap-top" style="background-color:${tier.color}"></div>
-                    <div class="mini-cap-bottom"></div>
-                    ${isShinyReward ? '<span class="shiny-icon">✨</span>' : ''}
-                    <img src="${getPokemonSpriteUrl(res.finalId, isShinyReward)}">
+            <div class="mini-reward-card">
+                <div class="pokemon-reward-card ${borderClass}">
+                    <div class="pokemon-reward-sprite">
+                        ${isShinyReward ? '<span class="shiny-icon">✨</span>' : ''}
+                        <img src="${getPokemonSpriteUrl(res.finalId, isShinyReward)}" style="${getMutationFilterStyle(mutations)}">
+                    </div>
+                    <div class="reward-info">
+                        <span class="badge ${isShinyReward ? 'shiny-badge' : ''}" style="background-color:${tier.color};">${tier.name}${isShinyReward ? ' ✨' : ''}</span>
+                        ${getFormBadgeHtml(formInfo) ? `<div class="form-badges">${getFormBadgeHtml(formInfo)}</div>` : ''}
+                        ${getMutationBadgeHtml(mutations)}
+                    </div>
+                    <div class="reward-types-row">${typesHTML}</div>
                 </div>
-                <span class="badge ${isShinyReward ? 'shiny-badge' : ''}" style="background-color:${tier.color}; font-size:10px; margin: 2px 0;">${tier.name}${isShinyReward ? ' ✨' : ''}</span>
-                <div class="mini-reward-types">${typesHTML}</div>
             </div>
         `;
     });
@@ -996,6 +1353,92 @@ document.getElementById('fruit-spin-btn').addEventListener('click', spinFruitSlo
 
 // --- Inventory & Crafting Logic ---
 let activeBagView = 'pokemon';
+let currentSpeciesDetail = null;
+
+function getSpeciesOwnedEntries(speciesId) {
+    const results = [];
+    Object.entries(inventory).forEach(([tierKey, tierItems]) => {
+        tierItems.forEach(item => {
+            if ((item.speciesId || item.id) === speciesId) {
+                results.push({ tierKey, ...item });
+            }
+        });
+    });
+    return results;
+}
+
+function getSpeciesOwnedCopyCount(speciesId) {
+    return getSpeciesOwnedEntries(speciesId).reduce((total, entry) => total + (Number(entry.count) || 1), 0);
+}
+
+async function openSpeciesDetailModal(item, tierKey) {
+    const speciesId = item.speciesId || item.id;
+    currentSpeciesDetail = { speciesId, tierKey };
+
+    const modal = document.getElementById('species-detail-modal');
+    const nameEl = document.getElementById('species-detail-name');
+    const tierEl = document.getElementById('species-detail-tier');
+    const summaryEl = document.getElementById('species-detail-summary');
+    const imgEl = document.getElementById('species-detail-img');
+    const craftBtn = document.getElementById('species-craft-btn');
+    const upgradeBtn = document.getElementById('species-upgrade-btn');
+    const pokedexBtn = document.getElementById('species-pokedex-btn');
+
+    try {
+        const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon/${speciesId}`).then(res => res.json());
+        nameEl.textContent = speciesData.name.charAt(0).toUpperCase() + speciesData.name.slice(1).replace('-', ' ');
+    } catch (error) {
+        nameEl.textContent = `#${speciesId}`;
+    }
+
+    const ownedEntries = getSpeciesOwnedEntries(speciesId);
+    const ownedCopyCount = getSpeciesOwnedCopyCount(speciesId);
+    const tierName = rarityTiers[tierKey]?.name || 'Unknown';
+    const upgradeTargetTier = getUpgradeTargetTier(tierKey);
+    const upgradeCost = getPointUpgradeCost(tierKey);
+    const currentPoints = speciesPoints[speciesId] || 0;
+    const upgradeCandidate = ownedEntries.find(entry => entry.tierKey === tierKey && !favorites.includes(entry.id));
+    const canCraft = Boolean(rarityTiers[tierKey]?.next);
+    const canUpgrade = tierKey !== 'mythical' && tierKey !== 'umbra' && upgradeTargetTier && upgradeCandidate && currentPoints >= upgradeCost;
+
+    tierEl.textContent = `${tierName} • ${ownedCopyCount} owned`;
+    imgEl.src = getPokemonSpriteUrl(speciesId, item.shiny);
+    imgEl.style.cssText = getMutationFilterStyle(item.mutations);
+
+    summaryEl.innerHTML = `
+        <div class="species-detail-card"><strong>Current tier:</strong> ${tierName}</div>
+        <div class="species-detail-card"><strong>Owned copies:</strong> ${ownedCopyCount}</div>
+        <div class="species-detail-card"><strong>Species points:</strong> ${currentPoints}</div>
+        <div class="species-detail-card"><strong>Mutations:</strong> ${item.mutations && item.mutations.length ? getMutationBadgeHtml(item.mutations, true) : 'None yet'}</div>
+    `;
+
+    craftBtn.disabled = !canCraft;
+    craftBtn.onclick = () => {
+        playSound('click');
+        closeSpeciesDetailModal();
+        craftPokemon(tierKey);
+    };
+
+    upgradeBtn.disabled = !canUpgrade;
+    upgradeBtn.onclick = () => {
+        playSound('click');
+        closeSpeciesDetailModal();
+        upgradePokemonTier(tierKey, speciesId);
+    };
+
+    pokedexBtn.onclick = () => {
+        playSound('click');
+        closeSpeciesDetailModal();
+        openDexModal(speciesId);
+    };
+
+    modal.classList.remove('hidden');
+}
+
+function closeSpeciesDetailModal() {
+    playSound('click');
+    document.getElementById('species-detail-modal').classList.add('hidden');
+}
 
 function renderInventory(view = activeBagView) {
     activeBagView = view;
@@ -1012,7 +1455,7 @@ function renderInventory(view = activeBagView) {
     if (subtitle) {
         subtitle.textContent = activeBagView === 'fruit'
             ? 'Your fruit capsules are sorted by rarity tier.'
-            : 'Trade 5 of the same rarity for 1 of the next!';
+            : 'Craft higher rarities from matching Pokémon or use species points to upgrade existing ones.';
     }
 
     content.innerHTML = '';
@@ -1054,7 +1497,11 @@ function renderInventory(view = activeBagView) {
         const tier = rarityTiers[tierKey];
         const items = getInventoryItems(tierKey);
         const unfavoritedCount = items.filter(item => !favorites.includes(item.id)).length;
-        const canCraft = tier.next !== null && unfavoritedCount >= 5;
+        const canCraft = tier.next !== null && unfavoritedCount >= getCraftRequirementForTier(tierKey);
+        const upgradeTargetTier = getUpgradeTargetTier(tierKey);
+        const upgradeCost = getPointUpgradeCost(tierKey);
+        const upgradeCandidate = items.find(item => !favorites.includes(item.id));
+        const canUpgrade = tierKey !== 'mythical' && tierKey !== 'umbra' && upgradeTargetTier && upgradeCandidate && (speciesPoints[upgradeCandidate.speciesId || upgradeCandidate.id] || 0) >= upgradeCost;
 
         const section = document.createElement('div');
         section.classList.add('inv-tier-section');
@@ -1064,7 +1511,22 @@ function renderInventory(view = activeBagView) {
         header.classList.add('inv-tier-header');
         
         let titleHTML = `<span class="badge" style="background-color:${tier.color}">${tier.name}</span> (${items.length})`;
-        let btnHTML = tier.next ? `<button class="craft-btn" ${canCraft ? '' : 'disabled'} onclick="craftPokemon('${tierKey}')">Craft ${rarityTiers[tier.next].name} (5)</button>` : '';
+        let btnHTML = '';
+        if (tier.next) {
+            btnHTML += `
+                <div class="craft-controls">
+                    <input class="craft-amount-input" type="number" min="1" max="10" value="1" aria-label="Craft amount">
+                    <button class="craft-btn" ${canCraft ? '' : 'disabled'} onclick="craftPokemon('${tierKey}', this.previousElementSibling.value)">Craft ${rarityTiers[tier.next].name}</button>
+                </div>
+            `;
+        }
+        if (upgradeTargetTier && upgradeCost) {
+            btnHTML += `
+                <div class="craft-controls">
+                    <button class="craft-btn" ${canUpgrade ? '' : 'disabled'} onclick="upgradePokemonTier('${tierKey}')">Upgrade (${upgradeCost} pts)</button>
+                </div>
+            `;
+        }
         
         header.innerHTML = `<h3>${titleHTML}</h3> ${btnHTML}`;
         section.appendChild(header);
@@ -1079,8 +1541,7 @@ function renderInventory(view = activeBagView) {
             box.style.cursor = 'pointer';
             box.onclick = () => {
                 playSound('click');
-                switchScreen('screen-inventory', 'screen-pokedex');
-                setTimeout(() => openDexModal(item.id), 120);
+                openSpeciesDetailModal(item, tierKey);
             };
             box.innerHTML = `
                 <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${item.id})">
@@ -1088,7 +1549,14 @@ function renderInventory(view = activeBagView) {
                 </button>
                 ${item.shiny ? '<span class="shiny-icon">✨</span>' : ''}
                 ${item.count > 1 ? `<span class="inv-count-badge">x${item.count}</span>` : ''}
-                <img src="${getPokemonSpriteUrl(item.id, item.shiny)}" alt="poke">
+                <div class="inventory-card-sprite">
+                    <img src="${getPokemonSpriteUrl(item.id, item.shiny)}" alt="poke" style="${getMutationFilterStyle(item.mutations)}">
+                </div>
+                <div class="inventory-card-meta">
+                    <span class="badge" style="background-color:${tier.color}; font-size:10px; padding:3px 6px; margin:0;">${tier.name}</span>
+                    ${item.form ? `<div class="form-badges">${getFormBadgeHtml(item.form)}</div>` : ''}
+                    ${getMutationBadgeHtml(item.mutations, true)}
+                </div>
             `;
             grid.appendChild(box);
         });
@@ -1100,31 +1568,51 @@ function renderInventory(view = activeBagView) {
     });
 }
 
-function craftPokemon(fromTierKey) {
-    openSelectionModal('craft', fromTierKey, 5, async (selectedIndices) => {
+function craftPokemon(fromTierKey, batchCountInput = 1) {
+    const batchCount = Math.max(1, Math.min(10, parseInt(batchCountInput, 10) || 1));
+    const requiredCount = getCraftRequirementForTier(fromTierKey) * batchCount;
+
+    openSelectionModal('craft', fromTierKey, requiredCount, async (selectedIndices) => {
         playSound('craft');
         const inventoryScreen = document.getElementById('screen-inventory');
         inventoryScreen.classList.add('crafting-active');
 
         const toTierKey = rarityTiers[fromTierKey].next;
+        if (!toTierKey) return;
         const toTier = rarityTiers[toTierKey];
-        
-        const sacrificedIds = selectedIndices.map(idx => inventory[fromTierKey][idx].id);
-        selectedIndices.sort((a,b) => b - a).forEach(idx => inventory[fromTierKey].splice(idx, 1));
-        
-        const randomGen = Math.floor(Math.random() * 9) + 1;
-        const { baseId, finalId } = await getRewardId(toTierKey, randomGen);
-        
-        addPokemonToInventory(toTierKey, finalId, false);
-        if (!ownedSpecies.includes(baseId)) ownedSpecies.push(baseId);
+
+        const selectedItems = selectedIndices.map(idx => inventory[fromTierKey][idx]).filter(Boolean);
+        const sameSpecies = selectedItems.length > 0 && selectedItems.every(item => (item.speciesId || item.id) === (selectedItems[0].speciesId || selectedItems[0].id));
+        const targetSpeciesId = sameSpecies ? (selectedItems[0].speciesId || selectedItems[0].id) : null;
+        const targetTierKey = sameSpecies && fromTierKey === 'epic' ? 'umbra' : toTierKey;
+
+        const sacrificedIds = selectedItems.map(item => item.id);
+        selectedIndices.sort((a, b) => b - a).forEach(idx => inventory[fromTierKey].splice(idx, 1));
+
+        const craftedIds = [];
+        for (let i = 0; i < batchCount; i += 1) {
+            let baseId = targetSpeciesId;
+            let finalId = targetSpeciesId || null;
+            if (!baseId) {
+                const randomGen = Math.floor(Math.random() * 9) + 1;
+                const reward = await getRewardId(targetTierKey, randomGen);
+                baseId = reward.baseId;
+                finalId = reward.finalId;
+            }
+            const mutations = getRandomMutations();
+            craftedIds.push({ baseId, finalId, mutations });
+            addPokemonToInventory(targetTierKey, finalId || baseId, false, mutations, null, targetSpeciesId || baseId);
+            if (!ownedSpecies.includes(baseId)) ownedSpecies.push(baseId);
+        }
+
         saveInventory();
-        
+
         const vortex = document.getElementById('craft-vortex');
         vortex.innerHTML = '';
         sacrificedIds.forEach(id => {
             vortex.innerHTML += `<img class="craft-particle" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png">`;
         });
-        
+
         document.getElementById('craft-anim-modal').classList.remove('hidden');
 
         setTimeout(() => {
@@ -1132,15 +1620,73 @@ function craftPokemon(fromTierKey) {
             renderInventory();
             document.getElementById('craft-anim-modal').classList.add('hidden');
             playSound('win');
-            
-            document.getElementById('craft-tier-name').textContent = toTier.name;
-            document.getElementById('craft-tier-name').style.color = toTier.color;
-            document.getElementById('craft-cap-top').style.backgroundColor = toTier.color;
-            document.getElementById('craft-pokemon-img').src = getPokemonSpriteUrl(finalId, false);
-            
-            document.getElementById('craft-modal').classList.remove('hidden');
+
+            const craftGrid = document.getElementById('craft-pokemon-grid');
+            const craftModal = document.getElementById('craft-modal');
+            const craftTierName = document.getElementById('craft-tier-name');
+
+            if (craftGrid) {
+                craftGrid.innerHTML = craftedIds.map(craft => `<img src="${getPokemonSpriteUrl(craft.finalId || craft.baseId, false)}" alt="crafted pokemon" style="${getMutationFilterStyle(craft.mutations)}">`).join('');
+            }
+            if (craftTierName) {
+                craftTierName.textContent = batchCount > 1 ? `${batchCount} ${rarityTiers[targetTierKey].name}` : rarityTiers[targetTierKey].name;
+                craftTierName.style.color = rarityTiers[targetTierKey].color;
+            }
+            if (craftModal) {
+                craftModal.classList.remove('hidden');
+            }
         }, 2000);
     });
+}
+
+function upgradePokemonTier(fromTierKey, selectedSpeciesId = null) {
+    const upgradeTargetTier = getUpgradeTargetTier(fromTierKey);
+    const upgradeCost = getPointUpgradeCost(fromTierKey);
+    if (!upgradeTargetTier || !upgradeCost) return;
+
+    const items = inventory[fromTierKey] || [];
+    const candidate = (selectedSpeciesId
+        ? items.find(item => (item.speciesId || item.id) === selectedSpeciesId && !favorites.includes(item.id))
+        : null) || items.find(item => !favorites.includes(item.id));
+    if (!candidate) {
+        alert('You need at least one unfavorited Pokémon in this tier to upgrade it.');
+        return;
+    }
+
+    const speciesId = candidate.speciesId || candidate.id;
+    const currentPoints = speciesPoints[speciesId] || 0;
+    if (currentPoints < upgradeCost) {
+        alert(`You need ${upgradeCost} species points for this upgrade. Currently you have ${currentPoints}.`);
+        return;
+    }
+
+    speciesPoints[speciesId] = currentPoints - upgradeCost;
+    const index = inventory[fromTierKey].findIndex(item => item.id === candidate.id && item.shiny === candidate.shiny && arraysEqual(normalizeMutations(item.mutations), normalizeMutations(candidate.mutations)) && (item.speciesId || item.id) === speciesId);
+    if (index >= 0) {
+        inventory[fromTierKey].splice(index, 1);
+    }
+
+    const targetTierItems = inventory[upgradeTargetTier] || [];
+    const existingTargetItem = targetTierItems.find(item => item.id === candidate.id && item.shiny === candidate.shiny && arraysEqual(normalizeMutations(item.mutations), normalizeMutations(candidate.mutations)) && (item.speciesId || item.id) === speciesId);
+    if (existingTargetItem) {
+        existingTargetItem.count = (existingTargetItem.count || 1) + 1;
+        if (candidate.form && !existingTargetItem.form) {
+            existingTargetItem.form = candidate.form;
+        }
+    } else {
+        inventory[upgradeTargetTier].push({
+            id: candidate.id,
+            shiny: candidate.shiny,
+            mutations: normalizeMutations(candidate.mutations),
+            count: 1,
+            form: candidate.form || null,
+            speciesId
+        });
+    }
+    if (!ownedSpecies.includes(speciesId)) ownedSpecies.push(speciesId);
+    saveInventory();
+    renderInventory();
+    playSound('craft');
 }
 
 function closeCraftModal() {
@@ -1153,6 +1699,9 @@ function closeCraftModal() {
 // --- Pokédex Logic (With Shiny & Forms) ---
 let isShinyView = false;
 let currentPokeData = null;
+let currentDisplayMutations = [];
+let previewMutations = [];
+let currentPokemonOwned = false;
 
 document.getElementById('dex-gen-select').addEventListener('change', () => playSound('click'));
 
@@ -1188,6 +1737,7 @@ async function openDexModal(baseId) {
     document.getElementById('dex-modal').classList.remove('hidden');
     playSound('open');
     isShinyView = false; 
+    previewMutations = [];
     document.getElementById('dex-loading').classList.remove('hidden');
     document.getElementById('dex-content').classList.add('hidden');
     
@@ -1232,8 +1782,37 @@ async function openDexModal(baseId) {
 async function loadFormData(id, isOwned, speciesData) {
     const pokeData = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then(res => res.json());
     currentPokeData = pokeData;
+    currentDisplayMutations = getOwnedMutationsForPokemon(id);
+    currentPokemonOwned = Boolean(isOwned);
+    previewMutations = [];
     
     document.getElementById('dex-name').textContent = pokeData.name.charAt(0).toUpperCase() + pokeData.name.slice(1).replace('-', ' ');
+
+    const variantContainer = document.getElementById('dex-variant-ownership');
+    const ownership = getVariantOwnershipForPokemon(id);
+    if (variantContainer) {
+        variantContainer.innerHTML = `
+            <div class="dex-variant-chip ${ownership.base ? '' : 'unowned'}">🌱 Base</div>
+            <div class="dex-variant-chip ${ownership.shiny ? '' : 'unowned'}">✨ Shiny</div>
+            <div class="dex-variant-chip ${ownership.sakura ? '' : 'unowned'}">🌸 Sakura</div>
+            <div class="dex-variant-chip ${ownership.winter ? '' : 'unowned'}">❄️ Winter</div>
+            <div class="dex-variant-chip ${ownership.molten ? '' : 'unowned'}">🔥 Molten</div>
+        `;
+    } else {
+        const container = document.createElement('div');
+        container.id = 'dex-variant-ownership';
+        container.className = 'dex-variant-ownership';
+        container.innerHTML = `
+            <div class="dex-variant-chip ${ownership.base ? '' : 'unowned'}">🌱 Base</div>
+            <div class="dex-variant-chip ${ownership.shiny ? '' : 'unowned'}">✨ Shiny</div>
+            <div class="dex-variant-chip ${ownership.sakura ? '' : 'unowned'}">🌸 Sakura</div>
+            <div class="dex-variant-chip ${ownership.winter ? '' : 'unowned'}">❄️ Winter</div>
+            <div class="dex-variant-chip ${ownership.molten ? '' : 'unowned'}">🔥 Molten</div>
+        `;
+        const content = document.getElementById('dex-content');
+        const actions = document.getElementById('dex-actions');
+        content.insertBefore(container, actions);
+    }
     
     const badge = document.getElementById('dex-ownership-badge');
     if (isOwned) {
@@ -1242,6 +1821,68 @@ async function loadFormData(id, isOwned, speciesData) {
     } else {
         badge.textContent = "Unowned 🔒";
         badge.style.backgroundColor = "#b2bec3";
+    }
+
+    const mutationContainer = document.getElementById('dex-mutation-badges');
+    if (mutationContainer) {
+        mutationContainer.innerHTML = getMutationBadgeHtml(currentDisplayMutations);
+    } else {
+        const container = document.createElement('div');
+        container.id = 'dex-mutation-badges';
+        container.className = 'mutation-badges';
+        container.innerHTML = getMutationBadgeHtml(currentDisplayMutations);
+        const content = document.getElementById('dex-content');
+        const actions = document.getElementById('dex-actions');
+        content.insertBefore(container, actions);
+    }
+
+    const mutationPreviewContainer = document.getElementById('dex-mutation-preview');
+    const ownedMutationsForCurrentPokemon = currentDisplayMutations.filter(m => m && mutationDefs[m]);
+    if (mutationPreviewContainer) {
+        mutationPreviewContainer.innerHTML = '';
+        if (isOwned) {
+            const title = document.createElement('div');
+            title.className = 'dex-variant-chip';
+            title.textContent = 'Preview mutations';
+            mutationPreviewContainer.appendChild(title);
+            mutationOrder.forEach(mutationKey => {
+                const mutationIsOwned = ownedMutationsForCurrentPokemon.includes(mutationKey);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `dex-action-btn dex-mutation-btn ${previewMutations.includes(mutationKey) ? 'active' : ''} ${!mutationIsOwned ? 'disabled-btn' : ''}`;
+                btn.dataset.mutationKey = mutationKey;
+                btn.disabled = !mutationIsOwned;
+                btn.textContent = `${mutationDefs[mutationKey].icon} ${mutationDefs[mutationKey].name}`;
+                btn.onclick = () => toggleMutationPreview(mutationKey);
+                btn.title = mutationIsOwned ? `Preview ${mutationDefs[mutationKey].name}` : `Own a ${mutationDefs[mutationKey].name} mutation to preview`;
+                mutationPreviewContainer.appendChild(btn);
+            });
+        }
+    } else {
+        const container = document.createElement('div');
+        container.id = 'dex-mutation-preview';
+        container.className = 'dex-mutation-preview';
+        const content = document.getElementById('dex-content');
+        const actions = document.getElementById('dex-actions');
+        content.insertBefore(container, actions);
+        if (isOwned) {
+            const title = document.createElement('div');
+            title.className = 'dex-variant-chip';
+            title.textContent = 'Preview mutations';
+            container.appendChild(title);
+            mutationOrder.forEach(mutationKey => {
+                const mutationIsOwned = ownedMutationsForCurrentPokemon.includes(mutationKey);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `dex-action-btn dex-mutation-btn ${previewMutations.includes(mutationKey) ? 'active' : ''} ${!mutationIsOwned ? 'disabled-btn' : ''}`;
+                btn.dataset.mutationKey = mutationKey;
+                btn.disabled = !mutationIsOwned;
+                btn.textContent = `${mutationDefs[mutationKey].icon} ${mutationDefs[mutationKey].name}`;
+                btn.onclick = () => toggleMutationPreview(mutationKey);
+                btn.title = mutationIsOwned ? `Preview ${mutationDefs[mutationKey].name}` : `Own a ${mutationDefs[mutationKey].name} mutation to preview`;
+                container.appendChild(btn);
+            });
+        }
     }
 
     const favBtn = document.getElementById('dex-fav-btn');
@@ -1259,21 +1900,37 @@ async function loadFormData(id, isOwned, speciesData) {
     } else {
         favBtn.classList.add('hidden');
     }
+
+    const shinyBtn = document.getElementById('dex-shiny-btn');
+    const hasOwnedShiny = getVariantOwnershipForPokemon(id).shiny;
+    shinyBtn.disabled = !isOwned || !hasOwnedShiny;
+    shinyBtn.title = isOwned && hasOwnedShiny ? 'Preview the shiny form' : 'You need to own a shiny version first';
+    if (!isOwned || !hasOwnedShiny) {
+        isShinyView = false;
+    }
     
     updateDexImage();
     
     const typesContainer = document.getElementById('dex-types');
     typesContainer.innerHTML = '';
-    pokeData.types.forEach(t => {
+    if (isOwned) {
+        pokeData.types.forEach(t => {
+            const span = document.createElement('span');
+            span.className = 'badge';
+            span.style.backgroundColor = getTypeColor(t.type.name);
+            span.textContent = t.type.name.toUpperCase();
+            typesContainer.appendChild(span);
+        });
+    } else {
         const span = document.createElement('span');
         span.className = 'badge';
-        span.style.backgroundColor = getTypeColor(t.type.name);
-        span.textContent = t.type.name.toUpperCase();
+        span.style.backgroundColor = '#b2bec3';
+        span.textContent = '???';
         typesContainer.appendChild(span);
-    });
+    }
     
     const enEntry = speciesData.flavor_text_entries.find(e => e.language.name === 'en');
-    document.getElementById('dex-desc').textContent = enEntry ? enEntry.flavor_text.replace(/[\n\f]/g, ' ') : "No description available.";
+    document.getElementById('dex-desc').textContent = isOwned ? (enEntry ? enEntry.flavor_text.replace(/[\n\f]/g, ' ') : 'No description available.') : '???';
     
     const maxStat = 255; 
     const getStat = (name) => pokeData.stats.find(s => s.stat.name === name).base_stat;
@@ -1283,14 +1940,37 @@ async function loadFormData(id, isOwned, speciesData) {
     };
 
     for (const [key, val] of Object.entries(stats)) {
-        document.getElementById(`stat-${key}`).style.width = `${(val / maxStat) * 100}%`;
-        document.getElementById(`val-${key}`).textContent = val;
+        document.getElementById(`stat-${key}`).style.width = isOwned ? `${(val / maxStat) * 100}%` : '0%';
+        document.getElementById(`val-${key}`).textContent = isOwned ? val : '???';
     }
 }
 
 function toggleShiny() {
+    if (!currentPokemonOwned) return;
+    const ownership = getVariantOwnershipForPokemon(currentPokeData?.id || 0);
+    if (!ownership.shiny) return;
     playSound('click');
     isShinyView = !isShinyView;
+    updateDexImage();
+}
+
+function toggleMutationPreview(mutationKey) {
+    if (!currentPokemonOwned || !mutationDefs[mutationKey] || !currentDisplayMutations.includes(mutationKey)) return;
+    playSound('click');
+    if (previewMutations.includes(mutationKey)) {
+        previewMutations = previewMutations.filter(key => key !== mutationKey);
+    } else {
+        previewMutations = [...previewMutations, mutationKey];
+    }
+    const container = document.getElementById('dex-mutation-preview');
+    if (container) {
+        Array.from(container.children).forEach(child => {
+            if (child.tagName === 'BUTTON') {
+                const key = child.dataset.mutationKey;
+                child.classList.toggle('active', previewMutations.includes(key));
+            }
+        });
+    }
     updateDexImage();
 }
 
@@ -1298,18 +1978,32 @@ function updateDexImage() {
     if (!currentPokeData) return;
     const sprites = currentPokeData.sprites;
     const shinyBtn = document.getElementById('dex-shiny-btn');
+    const dexImg = document.getElementById('dex-detail-img');
     
-    if (isShinyView) {
+    let imageUrl = sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentPokeData.id}.png`;
+    if (isShinyView && currentPokemonOwned) {
         shinyBtn.classList.add('active');
         const animated = sprites.other?.showdown?.front_shiny;
         const staticImg = sprites.front_shiny || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${currentPokeData.id}.png`;
-        document.getElementById('dex-detail-img').src = animated || staticImg;
+        imageUrl = animated || staticImg;
     } else {
         shinyBtn.classList.remove('active');
         const animated = sprites.other?.showdown?.front_default;
         const staticImg = sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentPokeData.id}.png`;
-        document.getElementById('dex-detail-img').src = animated || staticImg;
+        imageUrl = animated || staticImg;
     }
+
+    dexImg.src = imageUrl;
+
+    if (!currentPokemonOwned) {
+        dexImg.classList.add('dex-silhouette');
+        dexImg.style.cssText = 'filter: brightness(0) saturate(0); -webkit-filter: brightness(0) saturate(0);';
+        shinyBtn.classList.remove('active');
+        return;
+    }
+
+    dexImg.classList.remove('dex-silhouette');
+    dexImg.style.cssText = getMutationFilterStyle(previewMutations);
 }
 
 function closeDexModal() {

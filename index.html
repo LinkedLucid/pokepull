@@ -15,53 +15,88 @@
     <div class="volume-control">
         <label for="bgm-volume-slider">🎵 Music</label>
         <input type="range" id="bgm-volume-slider" min="0" max="1" step="0.05" value="0.2">
+        <input type="number" id="bgm-volume-input" min="0" max="1" step="0.05" value="0.2" style="width: 60px;">
     </div>
     <button class="dev-toggle-btn" id="dev-toggle-btn" type="button" aria-label="Developer mode"></button>
 
     <div id="dev-panel" class="dev-panel hidden">
         <h3>🛠️ Dev Tools</h3>
-        <label class="dev-field">
-            <span>Override next spin</span>
-            <input type="checkbox" id="dev-enable-override">
-        </label>
-        <label class="dev-field">
-            <span>Generation</span>
-            <select id="dev-gen-select">
-                <option value="">Random</option>
-                <option value="1">Gen 1</option>
-                <option value="2">Gen 2</option>
-                <option value="3">Gen 3</option>
-                <option value="4">Gen 4</option>
-                <option value="5">Gen 5</option>
-                <option value="6">Gen 6</option>
-                <option value="7">Gen 7</option>
-                <option value="8">Gen 8</option>
-                <option value="9">Gen 9</option>
-            </select>
-        </label>
-        <label class="dev-field">
-            <span>Rarity</span>
-            <select id="dev-rarity-select">
-                <option value="">Random</option>
-                <option value="common">Common</option>
-                <option value="rare">Rare</option>
-                <option value="epic">Epic</option>
-                <option value="legendary">Legendary</option>
-            </select>
-        </label>
-        <label class="dev-field">
-            <span>Force shiny</span>
-            <input type="checkbox" id="dev-shiny-checkbox">
-        </label>
-        <label class="dev-field">
-            <span>Exact Pokémon ID</span>
-            <input type="number" id="dev-pokemon-id" min="1" max="1025" placeholder="e.g. 150">
-        </label>
-        <div class="dev-actions">
-            <button type="button" id="dev-apply-btn">Apply</button>
-            <button type="button" id="dev-clear-btn">Clear</button>
+        
+        <div class="dev-section">
+            <div class="dev-section-title">Single Spin Override</div>
+            <label class="dev-field">
+                <span>Enable</span>
+                <input type="checkbox" id="dev-enable-override">
+            </label>
+            <label class="dev-field">
+                <span>Generation</span>
+                <select id="dev-gen-select">
+                    <option value="">Random</option>
+                    <option value="1">Gen 1</option>
+                    <option value="2">Gen 2</option>
+                    <option value="3">Gen 3</option>
+                    <option value="4">Gen 4</option>
+                    <option value="5">Gen 5</option>
+                    <option value="6">Gen 6</option>
+                    <option value="7">Gen 7</option>
+                    <option value="8">Gen 8</option>
+                    <option value="9">Gen 9</option>
+                </select>
+            </label>
+            <label class="dev-field">
+                <span>Rarity</span>
+                <select id="dev-rarity-select">
+                    <option value="">Random</option>
+                    <option value="common">Common</option>
+                    <option value="uncommon">Uncommon</option>
+                    <option value="rare">Rare</option>
+                    <option value="epic">Epic</option>
+                    <option value="legendary">Legendary</option>
+                    <option value="mythical">Mythical</option>
+                    <option value="umbra">Umbra</option>
+                </select>
+            </label>
+            <label class="dev-field">
+                <span>Pokémon ID</span>
+                <input type="number" id="dev-pokemon-id" min="1" max="1025" placeholder="Leave empty for random">
+            </label>
+            <label class="dev-field">
+                <span>Force Shiny</span>
+                <input type="checkbox" id="dev-shiny-checkbox">
+            </label>
+            <div class="dev-field">
+                <span>Mutations</span>
+                <div class="dev-mutations-checkboxes">
+                    <label><input type="checkbox" name="dev-mutation" value="sakura"> Sakura 🌸</label>
+                    <label><input type="checkbox" name="dev-mutation" value="winter"> Winter ❄️</label>
+                    <label><input type="checkbox" name="dev-mutation" value="molten"> Molten 🔥</label>
+                    <label><input type="checkbox" name="dev-mutation" value="nuclear"> Nuclear ☢️</label>
+                    <label><input type="checkbox" name="dev-mutation" value="galaxy"> Galaxy 🌌</label>
+                    <label><input type="checkbox" name="dev-mutation" value="silver"> Silver ✨</label>
+                    <label><input type="checkbox" name="dev-mutation" value="shadow"> Shadow 🌑</label>
+                    <label><input type="checkbox" name="dev-mutation" value="gay"> Rainbow 🌈</label>
+                </div>
+            </div>
         </div>
-        <div id="dev-status" class="dev-status">No overrides active.</div>
+
+        <div class="dev-section">
+            <div class="dev-section-title">Multi-Spin Override</div>
+            <label class="dev-field">
+                <span>Generations</span>
+                <input type="text" id="dev-multi-gen-input" placeholder="1,2,3">
+            </label>
+            <label class="dev-field">
+                <span>Rarities</span>
+                <input type="text" id="dev-multi-rarity-input" placeholder="legendary,epic">
+            </label>
+        </div>
+
+        <div class="dev-actions">
+            <button type="button" id="dev-apply-btn">Apply Overrides</button>
+            <button type="button" id="dev-clear-btn">Clear Overrides</button>
+            <button type="button" id="dev-clear-data-btn" class="dev-danger-btn">🗑️ Clear All Data</button>
+        </div>
+        <div id="dev-status" class="dev-status">Ready.</div>
     </div>
 
     <div id="loading-screen" class="screen">
@@ -116,9 +151,11 @@
             <h2 id="wheel-title">🎀 Gen Wheel 🎀</h2>
             
             <div id="multi-spin-controls">
-                <button onclick="attemptMultiSpin(5, 'rare')" class="multi-btn rare-btn">x5 Spin (Cost: 1 Rare)</button>
-                <button onclick="attemptMultiSpin(10, 'epic')" class="multi-btn epic-btn">x10 Spin (Cost: 1 Epic)</button>
-                <button onclick="attemptMultiSpin(25, 'legendary')" class="multi-btn legendary-btn">x25 Spin (Cost: 1 Legendary)</button>
+                <button onclick="attemptMultiSpin(3, 'uncommon')" class="multi-btn rare-btn">x3 Spin (Cost: 1 Uncommon)</button>
+                <button onclick="attemptMultiSpin(7, 'rare')" class="multi-btn epic-btn">x7 Spin (Cost: 1 Rare)</button>
+                <button onclick="attemptMultiSpin(15, 'epic')" class="multi-btn legendary-btn">x15 Spin (Cost: 1 Epic)</button>
+                <button onclick="attemptMultiSpin(30, 'legendary')" class="multi-btn mythical-btn">x30 Spin (Cost: 1 Legendary)</button>
+                <button onclick="attemptMultiSpin(60, 'mythical')" class="multi-btn umbra-btn">x60 Spin (Cost: 1 Mythical)</button>
             </div>
 
             <div class="wheel-box">
@@ -131,19 +168,17 @@
             <button id="spinBtn">SPIN!</button>
             <div id="message">Spin to pick a Generation!</div>
 
-            <div id="reward-area">
-                <div class="capsule">
-                    <div class="capsule-top" id="cap-top"></div>
-                    <div class="capsule-bottom"></div>
-                    <div class="capsule-button"></div>
-                    <img id="pokemon-img" src="" alt="pokemon">
-                </div>
-                <div class="reward-info">
-                    <div class="badge" id="gen-badge">Gen 1</div>
-                    <div class="badge" id="rarity-badge">Legendary</div>
-                </div>
-                <div id="reward-types" class="dex-types" style="margin-top: 10px;">
+            <div id="reward-area" class="reward-area-card hidden">
+                <div class="pokemon-reward-card rarity-card-common" id="reward-card-glow">
+                    <div class="pokemon-reward-sprite">
+                        <img id="pokemon-img" src="" alt="pokemon">
                     </div>
+                    <div class="reward-info">
+                        <div class="badge" id="gen-badge">Gen 1</div>
+                        <div class="badge" id="rarity-badge">Legendary</div>
+                    </div>
+                    <div id="reward-types" class="dex-types reward-types-row"></div>
+                </div>
             </div>
 
             <div id="multi-reward-area" class="hidden"></div>
@@ -219,13 +254,29 @@
             <div class="modal-content">
                 <h3>✨ Trade Successful! ✨</h3>
                 <p>You crafted a <span id="craft-tier-name">Rare</span> Pokémon!</p>
-                <div class="capsule">
-                    <div class="capsule-top" id="craft-cap-top"></div>
-                    <div class="capsule-bottom"></div>
-                    <div class="capsule-button"></div>
-                    <img id="craft-pokemon-img" src="" alt="pokemon">
-                </div>
+                <div class="craft-preview-panel">
+                <div id="craft-pokemon-grid" class="craft-pokemon-grid"></div>
+            </div>
                 <button onclick="closeCraftModal()" style="margin-top: 15px;">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="species-detail-modal" class="modal hidden">
+        <div class="modal-content species-detail-modal-content">
+            <button class="close-btn" onclick="closeSpeciesDetailModal()">✖</button>
+            <div id="species-detail-content">
+                <h3 id="species-detail-name">Species</h3>
+                <div class="badge" id="species-detail-tier">Tier</div>
+                <div class="dex-image-container">
+                    <img id="species-detail-img" src="" alt="species">
+                </div>
+                <div id="species-detail-summary" class="species-detail-summary"></div>
+                <div class="dex-actions" id="species-detail-actions">
+                    <button id="species-craft-btn" class="dex-action-btn">🛠️ Craft</button>
+                    <button id="species-upgrade-btn" class="dex-action-btn">⬆️ Upgrade</button>
+                    <button id="species-pokedex-btn" class="dex-action-btn">📖 Pokédex</button>
+                </div>
             </div>
         </div>
     </div>
@@ -299,6 +350,11 @@
             <h3 id="select-modal-title">Select Pokémon</h3>
             <p id="select-modal-subtitle">Pick 5 Pokémon</p>
             
+            <div class="selection-controls">
+                <button type="button" id="select-random-btn" class="select-action-btn">Random</button>
+                <button type="button" id="select-clear-btn" class="select-action-btn">Clear</button>
+            </div>
+
             <div id="select-grid" class="inv-grid selection-grid">
                 </div>
             
